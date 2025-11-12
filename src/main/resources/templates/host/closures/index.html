@@ -9,6 +9,40 @@
   <!-- FullCalendar（CDN） -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  
+    <style>
+    @media (max-width: 576px) {
+
+      /* カレンダータイトル（「2025年11月」など） */
+      #calendar .fc-toolbar-title {
+        font-size: 0.8rem;
+      }
+
+      /* 曜日ヘッダー（横軸の日付・曜日） */
+      #calendar .fc-col-header-cell-cushion {
+        font-size: 0.65rem;
+        padding: 2px 0;
+      }
+
+      /* 月間ビューの日付数字（各セル右上） */
+      #calendar .fc-daygrid-day-number {
+        font-size: 0.75rem;
+        padding: 0 2px;
+      }
+
+      /* 週間/日ビューの時間ラベル（縦軸 09:00 など） */
+      #calendar .fc-timegrid-slot-label-cushion,
+      #calendar .fc-timegrid-axis-cushion {
+        font-size: 0.7rem;
+      }
+
+      /* イベントの文字も少し小さくしたい場合（任意） */
+      #calendar .fc-daygrid-event,
+      #calendar .fc-timegrid-event {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
 </head>
 <body>
 <div class="samuraitravel-wrapper">

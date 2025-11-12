@@ -566,6 +566,31 @@ function paintMonthCells(cal) {
 .fc .fc-daygrid-day.fc-day-open {
   background-color: #bff0bf !important; /* 営業（空き） */
 }
+@media (max-width: 576px) {
+
+  /* カレンダータイトル（上部の「2025年11月」など） */
+  .fc .fc-toolbar-title {
+    font-size: 0.8rem;
+  }
+
+  /* 横軸：曜日・日付ヘッダー */
+  .fc .fc-col-header-cell-cushion {
+    font-size: 0.65rem;
+    padding: 2px 0;
+  }
+
+  /* 月間ビューの日付数字（セル右上の「1」「2」など） */
+  .fc .fc-daygrid-day-number {
+    font-size: 0.75rem;
+    padding: 0 2px;
+  }
+
+  /* 週間ビューの時間ラベル（縦の 09:00, 10:00 など）*/
+  .fc .fc-timegrid-slot-label-cushion,
+  .fc .fc-timegrid-axis-cushion {
+    font-size: 0.7rem;
+  }
+}
 </style>
 
 

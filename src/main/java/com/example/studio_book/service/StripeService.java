@@ -67,6 +67,8 @@ public class StripeService {
     @PostConstruct
     private void init() {
         // Stripeのシークレットキーを設定する
+        System.out.println("[StripeService] stripeApiKey=" 
+                + (stripeApiKey == null ? "null" : "length=" + stripeApiKey.length()));
         Stripe.apiKey = stripeApiKey;
     }
 
