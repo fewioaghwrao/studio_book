@@ -1,0 +1,44 @@
+<!— fragment/room-pricing.html —>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="pricing (flatFeeRules, multiplierRules)">
+    <!-- ▼ 料金ルール（一覧表示：同じ列に収める） -->
+    <div class="row pb-2 mb-2 border-bottom">
+      <div class="col-4"><span class="fw-bold">固定費</span></div>
+      <div class="col">
+        <div th:if="${#lists.isEmpty(flatFeeRules)}">（登録なし）</div>
+        <ul class="list-unstyled mb-0" th:if="${!#lists.isEmpty(flatFeeRules)}">
+          <li th:each="r : ${flatFeeRules}">
+            <!-- 固定費の曜日表示（0=日 … 6=土 を想定。nullは全日） -->
+            <span th:text="${r.weekday == null ? '全日' : {'日','月','火','水','木','金','土'}[r.weekday] + '曜'}"></span>
+            <span th:text="${#numbers.formatInteger(r.flatFee, 1, 'COMMA')}"></span><span>円</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row pb-2 mb-2 border-bottom">
+      <div class="col-4"><span class="fw-bold">加算料金</span></div>
+      <div class="col">
+        <div th:if="${#lists.isEmpty(multiplierRules)}">（登録なし）</div>
+        <ul class="list-unstyled mb-0" th:if="${!#lists.isEmpty(multiplierRules)}">
+          <li th:each="v : ${multiplierRules}">
+            <!-- 加算料金の曜日表示（v.rule.weekday） -->
+            <span th:text="${v.rule.weekday == null ? '全日' : {'日','月','火','水','木','金','土'}[v.rule.weekday] + '曜'}"></span>
+            <span>　</span>
+            <span th:text="${v.rule.startHour != null ? #temporals.format(v.rule.startHour, 'HH:mm') : '00:00'}"></span>
+            <span>～</span>
+            <span th:text="${v.rule.endHour != null ? #temporals.format(v.rule.endHour, 'HH:mm') : '24:00'}"></span>
+            <span>　</span>
+            <span th:text="${#numbers.formatInteger(v.amount, 1, 'COMMA')}"></span><span>円</span>
+            <span class="text-muted small">（倍率:
+              <span th:text="${#numbers.formatDecimal(v.rule.multiplier, 1, 2)}"></span>×基本料金）</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- ▲ 料金ルール -->
+  </div>
+</body>
+</html>

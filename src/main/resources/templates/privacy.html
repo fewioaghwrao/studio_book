@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>プライバシーポリシー</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container samuraitravel-container pt-4 pb-5">
+      <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+          <li class="breadcrumb-item active" aria-current="page">プライバシーポリシー</li>
+        </ol>
+      </nav>
+
+      <h1 class="mb-3">プライバシーポリシー</h1>
+      <p class="text-muted">最終更新日：<span th:text="${lastUpdated}">2025-10-23</span></p>
+      <hr>
+
+      <section class="mb-4">
+        <h2 class="h4">1. 基本方針</h2>
+        <p>当運営者は、個人情報保護法等を遵守し、適切に取り扱います。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">2. 取得する情報</h2>
+        <ul>
+          <li>登録情報（氏名、メールアドレス、電話番号 など）</li>
+          <li>予約・決済情報（利用日時、金額、決済手段 など）</li>
+          <li>アクセスログ、IPアドレス、ブラウザ情報、Cookie など</li>
+        </ul>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">3. 利用目的</h2>
+        <ol>
+          <li>本サービスの提供・運営・本人確認</li>
+          <li>予約・決済の確認、連絡対応</li>
+          <li>料金請求・返金処理</li>
+          <li>問い合わせ対応、サービス改善・新機能開発</li>
+          <li>不正利用防止、法令遵守</li>
+        </ol>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">4. 第三者提供</h2>
+        <p>本人同意、法令に基づく場合、または委託先への必要な提供を除き、第三者提供は行いません。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">5. 委託先の監督</h2>
+        <p>個人情報の取扱いを委託する場合、適切な監督を行います。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">6. 安全管理措置</h2>
+        <p>アクセス制御、暗号化、ログ監査等の対策を講じます。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">7. Cookie・解析</h2>
+        <p>体験向上・利用分析のためCookieを使用します。設定により無効化できます。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">8. 開示・訂正・削除</h2>
+        <p>ユーザーは当運営者に対し、保有個人データの開示・訂正・削除等を請求できます。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">9. お問い合わせ</h2>
+        <address class="mb-0">
+          N.O.（運営者）<br>
+          E-mail：<a href="mailto:info@example.com">info@example.com</a><br>
+          所在地：東京都〇〇区〇〇1-2-3
+        </address>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">10. 改定</h2>
+        <p>本ポリシーは必要に応じて改定し、サイト上に公表します。</p>
+      </section>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

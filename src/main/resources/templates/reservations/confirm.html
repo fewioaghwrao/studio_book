@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>予約内容確認</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xxl-9 col-xl-10 col-lg-11">
+          <h1 class="mb-4 text-center">予約内容確認</h1>
+
+<!-- th:objectで束ねると安全＆簡潔 -->
+<div th:object="${confirm}">
+  <div class="row pb-2 mb-2 border-bottom">
+    <div class="col-4"><span class="fw-bold">スタジオ</span></div>
+    <div class="col"><span th:text="*{roomName}"></span></div>
+  </div>
+
+  <div class="row pb-2 mb-2 border-bottom">
+    <div class="col-4"><span class="fw-bold">利用開始時刻</span></div>
+    <div class="col"><span th:text="${#temporals.format(confirm.startAt, 'yyyy年M月d日 HH:mm')}"></span></div>
+  </div>
+
+  <div class="row pb-2 mb-2 border-bottom">
+    <div class="col-4"><span class="fw-bold">利用完了時刻</span></div>
+    <div class="col"><span th:text="${#temporals.format(confirm.endAt, 'yyyy年M月d日 HH:mm')}"></span></div>
+  </div>
+
+  <div class="row pb-2 mb-2 border-bottom">
+    <div class="col-4"><span class="fw-bold">料金</span></div>
+    <div class="col">
+      <span th:text="${#numbers.formatInteger(confirm.hourlyPrice, 1, 'COMMA')}"></span> 円 ×
+      <span th:text="*{hours}"></span> 時間 ＝
+      <span class="fw-bold" th:text="${#numbers.formatInteger(confirm.amount, 1, 'COMMA')}"></span> 円
+    </div>
+  </div>
+  <!-- 内訳テーブル -->
+<table class="table table-sm align-middle mt-3">
+  <thead>
+  <tr>
+    <th style="width:40%">内訳</th>
+    <th class="text-end">金額</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="it : ${confirm.items}">
+    <td>
+      <span th:text="${it.label}"></span>
+      <div class="text-muted small"
+           th:if="${it.sliceStart != null and it.sliceEnd != null}"
+           th:text="${#temporals.format(it.sliceStart, 'M/d HH:mm')} + '–' + ${#temporals.format(it.sliceEnd, 'M/d HH:mm')}">
+      </div>
+    </td>
+    <td class="text-end">
+      <span th:text="${#numbers.formatInteger(it.amount, 1, 'COMMA')}"></span> 円
+    </td>
+  </tr>
+  </tbody>
+  <tfoot>
+  <tr>
+    <th class="text-end">小計</th>
+    <th class="text-end" th:text="${#numbers.formatInteger(confirm.subtotal, 1, 'COMMA')} + ' 円'"></th>
+  </tr>
+  <tr th:if="${confirm.tax != null}">
+    <th class="text-end">消費税</th>
+    <th class="text-end" th:text="${#numbers.formatInteger(confirm.tax, 1, 'COMMA')} + ' 円'"></th>
+  </tr>
+  <tr>
+    <th class="text-end">合計</th>
+    <th class="text-end text-primary" th:text="${#numbers.formatInteger(confirm.amount, 1, 'COMMA')} + ' 円'"></th>
+  </tr>
+  </tfoot>
+</table>
+
+</div>
+
+                            <div class="d-flex justify-content-center">
+<button id="paymentButton"
+        class="btn text-white shadow-sm w-100 samuraitravel-btn"
+        th:attr="data-session-id=${sessionId}">
+  決済する
+</button>
+                            </div>
+
+<!-- 戻るリンクも room ではなく confirm から -->
+<a th:href="@{/rooms/{roomId}(roomId=${confirm.roomId})}" class="btn btn-outline-secondary mt-3">戻る</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+<!-- Stripe & 公開鍵・セッションIDをグローバル変数としても埋める -->
+<script src="https://js.stripe.com/v3"></script>
+<script th:inline="javascript">
+  window.STRIPE_PK = /*[[${stripePublishableKey}]]*/ "";
+  window.__SESSION_ID__ = /*[[${sessionId}]]*/ null;  // ← フォールバック経路
+</script>
+<script th:src="@{/js/stripe.js?v=1}"></script> <!-- キャッシュ回避用に ?v=1 など付ける -->
+</body>
+</html>

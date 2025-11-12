@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+        <div th:replace="~{fragment :: meta}"></div>
+
+        <div th:replace="~{fragment :: styles}"></div>
+
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+
+        <!-- Swiper -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
+        <style>
+  .stars-readonly { position: relative; display: inline-block; font-size: 1rem; line-height: 1; }
+  .stars-readonly .base { color: #ddd; }
+  .stars-readonly .fill {
+    position: absolute; left: 0; top: 0;
+    white-space: nowrap; overflow: hidden;
+    color: #ffc107; /* Bootstrapのwarning相当（黄色） */
+  }
+</style>
+
+        <title>スタジオ時間貸し予約</title>
+    </head>
+    <body>
+        <div class="samuraitravel-wrapper">
+           <div th:replace="~{fragment :: header}"></div>
+
+            <main>
+                <div>
+                    <div class="swiper samuraitravel-swiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide"><img th:src="@{/images/main1.jpg}"></div>
+                            <div class="swiper-slide"><img th:src="@{/images/main2.jpg}"></div>
+                            <div class="swiper-slide"><img th:src="@{/images/main3.jpg}"></div>
+                            <div class="d-flex align-items-center samuraitravel-overlay-background">
+                                <div class="container samuraitravel-container samuraitravel-overlay-text">
+                                    <h1 class="text-white samuraitravel-catchphrase-heading">架空のスタジオを予約できます。</h1>
+                                    <p class="text-white samuraitravel-catchphrase-paragraph">※写真はすべてAI画像です。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${param.loggedIn}" class="container samuraitravel-container pt-2">
+                    <div class="alert alert-info mt-4 mb-0">
+                        ログインしました。
+                    </div>
+                </div>
+
+
+                <div th:if="${param.loggedOut}" class="container samuraitravel-container pt-2">
+                    <div class="alert alert-info mt-4 mb-0">
+                        ログアウトしました。
+                    </div>
+                </div>
+
+                <div th:if="${successMessage}" class="container samuraitravel-container pt-2">
+                    <div class="alert alert-info mt-4 mb-0">
+                        <span th:text="${successMessage}"></span>
+                    </div>
+                </div>
+
+                <div class="border-bottom mb-4 py-4">
+                    <div class="container samuraitravel-container my-2">
+                        <form method="get" th:action="@{/rooms}" class="samuraitravel-search-form">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="スタジオ名・開催地">
+                                <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="container samuraitravel-container">
+
+                    <div class="row justify-content-center pt-2">
+                        <div class="col-xl-3 col-lg-4 col-md-12 mb-4">
+                            <h2 class="mb-3">エリアから探す</h2>
+
+                            <div class="accordion accordion-flush" id="accordionArea">
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#hokkaido" aria-expanded="false" aria-controls="hokkaido">
+                                            北海道
+                                        </button>
+                                    </h3>
+                                    <div id="hokkaido" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=北海道}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                北海道
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#tohoku" aria-expanded="false" aria-controls="tohoku">
+                                            東北
+                                        </button>
+                                    </h3>
+                                    <div id="tohoku" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=青森県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                青森県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=岩手県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                岩手県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=宮城県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                宮城県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=秋田県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                秋田県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=山形県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                山形県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=福島県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                福島県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#kitakanto" aria-expanded="false" aria-controls="kitakanto">
+                                            北関東
+                                        </button>
+                                    </h3>
+                                    <div id="kitakanto" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=茨城県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                茨城県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=栃木県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                栃木県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=群馬県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                群馬県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#shutoken" aria-expanded="false" aria-controls="shutoken">
+                                            首都圏
+                                        </button>
+                                    </h3>
+                                    <div id="shutoken" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=埼玉県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                埼玉県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=千葉県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                千葉県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=東京都}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                東京都
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=神奈川県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                神奈川県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#koshinetsu" aria-expanded="false" aria-controls="koshinetsu">
+                                            甲信越
+                                        </button>
+                                    </h3>
+                                    <div id="koshinetsu" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=新潟県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                新潟県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=山梨県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                山梨県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=長野県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                長野県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#hokuriku" aria-expanded="false" aria-controls="hokuriku">
+                                            北陸
+                                        </button>
+                                    </h3>
+                                    <div id="hokuriku" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=富山県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                富山県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=石川県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                石川県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=福井県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                福井県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#tokai" aria-expanded="false" aria-controls="tokai">
+                                            東海
+                                        </button>
+                                    </h3>
+                                    <div id="tokai" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=岐阜県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                岐阜県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=静岡県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                静岡県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=愛知県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                愛知県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=三重県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                三重県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#kinki" aria-expanded="false" aria-controls="kinki">
+                                            近畿
+                                        </button>
+                                    </h3>
+                                    <div id="kinki" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=滋賀県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                滋賀県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=京都府}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                京都府
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=大阪府}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                大阪府
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=兵庫県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                兵庫県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=奈良県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                奈良県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=和歌山県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                和歌山県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#sanyoSanin" aria-expanded="false" aria-controls="sanyoSanin">
+                                            山陽・山陰
+                                        </button>
+                                    </h3>
+                                    <div id="sanyoSanin" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=鳥取県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                鳥取県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=島根県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                島根県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=岡山県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                岡山県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=広島県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                広島県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=山口県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                山口県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#shikoku" aria-expanded="false" aria-controls="shikoku">
+                                            四国
+                                        </button>
+                                    </h3>
+                                    <div id="shikoku" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=徳島県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                徳島県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=香川県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                香川県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=愛媛県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                愛媛県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=高知県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                高知県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#kyushu" aria-expanded="false" aria-controls="kyushu">
+                                            九州
+                                        </button>
+                                    </h3>
+                                    <div id="kyushu" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=福岡県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                福岡県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=佐賀県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                佐賀県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=長崎県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                長崎県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=熊本県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                熊本県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=大分県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                大分県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=宮崎県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                宮崎県
+                                            </div>
+                                        </a>
+                                        <a th:href="@{/rooms?area=鹿児島県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                鹿児島県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#okinawa" aria-expanded="false" aria-controls="okinawa">
+                                            沖縄
+                                        </button>
+                                    </h3>
+                                    <div id="okinawa" class="accordion-collapse collapse" data-bs-parent="#accordionArea">
+                                        <a th:href="@{/rooms?area=沖縄県}" class="link-secondary">
+                                            <div class="accordion-body samuraitravel-accordion-body">
+                                                沖縄県
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <h2 class="mb-3">人気のスタジオ</h2>
+                            <div class="row row-cols-sm-3 row-cols-1 g-3 mb-4">
+                                <div class="col" th:each="popularRoom : ${popularRooms}">
+                                    <a th:href="@{/rooms/__${popularRoom.id}__}" class="link-dark samuraitravel-card-link">
+                                        <div class="card h-100">
+                                            <img th:if="${popularRoom.imageName}" th:src="@{/storage/__${popularRoom.imageName}__}" class="card-img-top samuraitravel-vertical-card-image" alt="スタジオ画像">
+                                            <img th:unless="${popularRoom.imageName}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-vertical-card-image" alt="NO IMAGE">
+                                            <div class="card-body">
+                                                <h3 class="card-title" th:text="${popularRoom.name}"></h3>
+                                                <p class="card-text mb-1">
+                                                    <small class="text-muted" th:text="${popularRoom.address}"></small>
+                                                </p>
+                                                <p class="card-text">
+                                                    <span th:text="${#numbers.formatInteger(popularRoom.price, 1, 'COMMA') + '円 / h'}"></span>
+                                                </p>
+                                                <!-- ★ 平均スコア表示（人気） -->
+<div th:with="avg=${avgScoreMap[popularRoom.id]}, cnt=${reviewCountMap[popularRoom.id]}">
+  <div th:if="${avg != null}">
+    <span class="stars-readonly" aria-label="平均評価">
+      <span class="base">★★★★★</span>
+      <span class="fill" th:style="'width:' + (${avg} * 20) + '%;'">★★★★★</span>
+    </span>
+    <span class="ms-1" th:text="${#numbers.formatDecimal(avg, 1, 1)} + ' / 5'"></span>
+<small class="text-muted ms-1"
+       th:text="${#strings.concat('（', cnt != null ? cnt : 0, '件）')}"></small>
+  </div>
+  <div th:if="${avg == null}" class="text-muted small">レビューなし</div>
+</div>
+                                                
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <h2 class="mb-3">新着</h2>
+                            <div class="row row-cols-xl-4 row-cols-2 g-3 mb-5">
+                                <div class="col" th:each="newRoom : ${newRooms}">
+                                    <a th:href="@{/rooms/__${newRoom.id}__}" class="link-dark samuraitravel-card-link">
+                                        <div class="card h-100">
+                                            <img th:if="${newRoom.imageName}" th:src="@{/storage/__${newRoom.imageName}__}" class="card-img-top samuraitravel-vertical-card-image" alt="スタジオ画像">
+                                            <img th:unless="${newRoom.imageName}" th:src="@{/images/noImage.png}" class="card-img-top samuraitravel-vertical-card-image" alt="NO IMAGE">
+                                            <div class="card-body">
+                                                <h3 class="card-title" th:text="${newRoom.name}"></h3>
+                                                <p class="card-text mb-1">
+                                                    <small class="text-muted" th:text="${newRoom.address}"></small>
+                                                </p>
+                                                <p class="card-text">
+                                                    <span th:text="${#numbers.formatInteger(newRoom.price, 1, 'COMMA') + '円 / h'}"></span>
+                                                </p>
+                                                <!-- ★ 平均スコア表示（新着） -->
+<div th:with="avg=${avgScoreMap[newRoom.id]}, cnt=${reviewCountMap[newRoom.id]}">
+  <div th:if="${avg != null}">
+    <span class="stars-readonly" aria-label="平均評価">
+      <span class="base">★★★★★</span>
+      <span class="fill" th:style="'width:' + (${avg} * 20) + '%;'">★★★★★</span>
+    </span>
+    <span class="ms-1" th:text="${#numbers.formatDecimal(avg, 1, 1)} + ' / 5'"></span>
+<small class="text-muted ms-1"
+       th:text="${#strings.concat('（', cnt != null ? cnt : 0, '件）')}"></small>
+  </div>
+  <div th:if="${avg == null}" class="text-muted small">レビューなし</div>
+</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <div th:replace="~{fragment :: footer}"></div>
+        </div>
+
+        <div th:replace="~{fragment :: scripts}"></div>
+
+        <!-- Swiper -->
+        <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+        <script th:src="@{/js/carousel.js}"></script>
+    </body>
+</html>

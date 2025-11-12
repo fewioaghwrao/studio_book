@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>パスワード再設定</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xl-3 col-lg-4 col-md-5 col-sm-7">
+          <h1 class="mb-4 text-center">新しいパスワードを入力</h1>
+
+          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+          <form th:action="@{/password/reset}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="token" th:value="${token}">
+
+            <input type="password" name="password" placeholder="新しいパスワード" required class="form-control mb-3">
+            <input type="password" name="passwordConfirm" placeholder="新しいパスワード（確認）" required class="form-control mb-3">
+
+            <button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">更新する</button>
+          </form>
+
+          <div class="text-center mt-3">
+            <a th:href="@{/login}">ログイン画面へ戻る</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

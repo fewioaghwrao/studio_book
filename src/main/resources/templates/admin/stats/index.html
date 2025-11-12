@@ -1,0 +1,189 @@
+<!-- src/main/resources/templates/admin/stats/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>データ一覧</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <!-- ▼ 登録ユーザー数（サマリ） -->
+        <div class="col-xxl-9 col-xl-10 col-lg-11 mb-3">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div class="text-muted">登録ユーザー数（スタジオ提供者）</div>
+                  <div id="providerCount" class="display-6">—</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div class="text-muted">登録ユーザー数（一般ユーザー）</div>
+                  <div id="generalCount" class="display-6">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ▼ 売上一覧（直近3か月） -->
+        <div class="col-xxl-9 col-xl-10 col-lg-11">
+          <h1 class="mb-4 text-center">売上一覧（直近3か月）</h1>
+
+          <!-- 対象選択（提供者名を右に表示） -->
+          <div class="d-flex gap-3 mb-3 align-items-end">
+            <div>
+              <label class="form-label">対象スタジオ</label>
+              <select id="roomSelect" class="form-select">
+                <option value="0" data-host="">全体（すべてのスタジオ）</option>
+                <option th:each="r: ${rooms}"
+                        th:value="${r.id}"
+                        th:data-host="${r.hostName}"  
+                        th:text="${r.name}">
+                </option>
+              </select>
+            </div>
+            <div class="pb-1">
+              <div class="text-muted small">スタジオ提供者</div>
+              <div id="hostName" class="fw-bold">—</div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm mb-4">
+            <div class="card-body">
+              <canvas id="statsChart" height="120"></canvas>
+            </div>
+          </div>
+
+          <!-- ▼ 直近3か月の稼働率 -->
+          <div class="row g-3 mt-3" id="utilSection">
+            <h1 class="mb-3 text-center">稼働率（直近3か月）</h1>
+            <div id="utilList" class="row g-3"></div>
+          </div>
+
+          <!-- ▼ 直近1週間の予約数 -->
+          <h1 class="mb-4 text-center mt-5">直近1週間の予約数</h1>
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <canvas id="weeklyChart" height="110"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+(async function() {
+  const statsCtx  = document.getElementById('statsChart').getContext('2d');
+  const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+
+  function yen(x) {
+    return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(x);
+  }
+  function pct1(x) {
+    if (x == null) return '—';
+    return (Math.round(x * 10) / 10).toFixed(1) + '%';
+  }
+  function renderUtilization(data) {
+    const labels = data.labels;
+    const rates  = data.utilizationPercents || [];
+    const wrap   = document.getElementById('utilList');
+    wrap.innerHTML = labels.map((label, i) => `
+      <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small mb-1">${label}</div>
+            <div class="display-6">${pct1(rates[i])}</div>
+            <div class="text-muted">（営業時間ベース）</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  function setUserCounts(data) {
+    document.getElementById('providerCount').textContent = data.providerCount ?? '—';
+    document.getElementById('generalCount').textContent  = data.generalCount ?? '—';
+  }
+  function setHostNameFromSelect() {
+    const sel = document.getElementById('roomSelect');
+    const opt = sel.options[sel.selectedIndex];
+    document.getElementById('hostName').textContent = opt.dataset.host || (Number(sel.value) === 0 ? '全体' : '—');
+  }
+
+  async function fetchData(roomId) {
+    const url = new URL(location.origin + '/admin/stats/api');
+    if (roomId && Number(roomId) !== 0) url.searchParams.set('roomId', roomId);
+    const res = await fetch(url, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error('Failed to load stats');
+    return await res.json();
+  }
+
+  let statsChart, weeklyChart;
+
+  async function render(roomId) {
+    const data = await fetchData(roomId);
+    setUserCounts(data);
+    renderUtilization(data);
+    setHostNameFromSelect();
+
+    // 月次（直近3か月）：手数料売上（booked=見込み、paid=確定）
+    const statsCfg = {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: '見込み売上（FEE）', type: 'bar',  data: data.bookedFee, borderWidth: 1 },
+          { label: '確定売上（FEE）',   type: 'line', data: data.paidFee,   tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, ticks: { callback: (v)=>yen(v) } } },
+        plugins: {
+          tooltip: { callbacks: { label: (c)=>`${c.dataset.label}: ${yen(c.parsed.y)}` } },
+          legend: { position: 'top' }
+        }
+      }
+    };
+    if (statsChart) statsChart.destroy();
+    statsChart = new Chart(statsCtx, statsCfg);
+
+    // 週間（直近7日）：予約件数
+    const weeklyCfg = {
+      type: 'bar',
+      data: { labels: data.weeklyLabels, datasets: [{ label: '予約件数（直近7日）', data: data.weeklyCounts }] },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        plugins: { legend: { display: false } }
+      }
+    };
+    if (weeklyChart) weeklyChart.destroy();
+    weeklyChart = new Chart(weeklyCtx, weeklyCfg);
+  }
+
+  // 初期化
+  await render(0);
+  document.getElementById('roomSelect').addEventListener('change', (e) => render(e.target.value));
+  setHostNameFromSelect();
+})();
+</script>
+</body>
+</html>

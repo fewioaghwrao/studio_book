@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>予約一覧（スタジオ提供者）</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container samuraitravel-container pb-5">
+      <div class="row justify-content-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-11">
+
+          <h1 class="my-4 text-center">予約一覧（スタジオ提供者）</h1>
+
+<form class="row g-2 mb-3" method="get" th:action="@{/host/reservations}">
+  <!-- キーワード（スタジオ名/予約者名） -->
+  <div class="col-md-4">
+    <input class="form-control" type="text" name="kw" placeholder="キーワード（スタジオ/予約者）"
+           th:value="${kw}">
+  </div>
+
+  <!-- 予約ID（完全一致） -->
+  <div class="col-md-2">
+    <input class="form-control" type="number" name="reservationId" placeholder="予約ID"
+           th:value="${reservationId}">
+  </div>
+
+  <!-- 状態 -->
+  <div class="col-md-2">
+    <select class="form-select" name="status" th:value="${status}">
+      <option value="">すべての状態</option>
+      <option value="booked">予約済み</option>
+      <option value="paid">承認済み</option>
+      <option value="canceled">キャンセル</option>
+    </select>
+  </div>
+
+  <!-- (任意) スタジオ絞り込み -->
+  <div class="col-md-2">
+    <select class="form-select" name="roomId" th:value="${roomId}">
+      <option value="">すべてのスタジオ</option>
+      <option th:each="opt : ${roomOptions}"
+              th:value="${opt.id}"
+              th:text="${opt.name}"></option>
+    </select>
+  </div>
+
+  <!-- 開始日時(開始日)の範囲 -->
+  <div class="col-md-2">
+    <input class="form-control" type="date" name="startFrom" th:value="${startFrom}">
+  </div>
+  <div class="col-md-2">
+    <input class="form-control" type="date" name="startTo" th:value="${startTo}">
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button class="btn btn-primary" type="submit">検索</button>
+    <a class="btn btn-outline-secondary" th:href="@{/host/reservations}">クリア</a>
+  </div>
+</form>
+          <div th:if="${param.approved}" class="alert alert-success">予約を承認しました。</div>
+          <div th:if="${param.canceled}" class="alert alert-warning">予約をキャンセルしました。</div>
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+              <tr>
+				<th>予約ID</th>
+                <th>スタジオ</th>
+                <th>予約者</th>
+                <th>開始</th>
+                <th>終了</th>
+                <th>料金</th>
+                <th>状態</th>
+                <th>操作</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="r : ${rows}">
+				<td th:text="${r.reservationId}"></td>
+                <td th:text="${r.roomName}"></td>
+                <td th:text="${r.guestName}"></td>
+
+                <!-- #temporals を使用。未導入なら下の依存を追加 -->
+                                       <td th:text="${#temporals.format(r.startAt, 'yyyy年M月d日 H:mm')}"></td>
+                                       <td th:text="${#temporals.format(r.endAt, 'yyyy年M月d日 H:mm')}"></td>
+                                       <td th:text="${#numbers.formatInteger(r.amount, 1, 'COMMA') + '円'}"></td>
+
+                <td>
+                  <span th:if="${r.status == 'booked'}"   class="badge text-bg-secondary">予約済み</span>
+                  <span th:if="${r.status == 'paid'}"     class="badge text-bg-success">承認済み</span>
+                  <span th:if="${r.status == 'canceled'}" class="badge text-bg-danger">キャンセル</span>
+                </td>
+
+<td class="text-end">
+  <div class="d-flex flex-column gap-2">
+    <form th:if="${r.status == 'booked'}"
+          th:action="@{/host/reservations/{id}/approve(id=${r.reservationId})}"
+          method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <button type="submit" class="btn btn-sm btn-success w-100">承認</button>
+    </form>
+
+    <form th:if="${r.status == 'booked'}"
+          th:action="@{/host/reservations/{id}/cancel(id=${r.reservationId})}"
+          method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <button type="submit" class="btn btn-sm btn-outline-danger w-100"
+              onclick="return confirm('本当にキャンセルしますか？');">
+        キャンセル
+      </button>
+    </form>
+  </div>
+</td>
+              </tr>
+              </tbody>
+            </table>
+        </div>
+                    <!-- 件数とページャ -->
+<div class="d-flex justify-content-between align-items-center mt-3" th:if="${page != null}">
+  <div class="small text-muted">
+    全 <span th:text="${page.totalElements}">0</span> 件中
+    <span th:text="${page.totalElements == 0 ? 0 : page.number * page.size + 1}">1</span>
+    〜
+    <span th:text="${T(java.lang.Math).min(((page.number + 1) * page.size) + 0L, page.totalElements)}">5</span> 件
+  </div>
+
+<nav th:if="${page.totalPages > 1}" aria-label="ページナビゲーション">
+  <ul class="pagination mb-0">
+    <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+      <a class="page-link"
+         th:href="@{/host/reservations(page=${page.number - 1},
+                                      kw=${kw}, status=${status},
+                                      startFrom=${startFrom}, startTo=${startTo},
+                                      reservationId=${reservationId}, roomId=${roomId})}">前へ</a>
+    </li>
+
+    <li class="page-item"
+        th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+        th:classappend="${i == page.number} ? 'active'">
+      <a class="page-link" th:text="${i + 1}"
+         th:href="@{/host/reservations(page=${i},
+                                      kw=${kw}, status=${status},
+                                      startFrom=${startFrom}, startTo=${startTo},
+                                      reservationId=${reservationId}, roomId=${roomId})}">1</a>
+    </li>
+
+    <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+      <a class="page-link"
+         th:href="@{/host/reservations(page=${page.number + 1},
+                                      kw=${kw}, status=${status},
+                                      startFrom=${startFrom}, startTo=${startTo},
+                                      reservationId=${reservationId}, roomId=${roomId})}">次へ</a>
+    </li>
+  </ul>
+</nav>
+          </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>
+

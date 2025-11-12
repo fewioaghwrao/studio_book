@@ -1,0 +1,61 @@
+<!-- src/main/resources/templates/admin/settings/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <div th:replace="~{fragment :: meta}"></div>
+    <div th:replace="~{fragment :: styles}"></div>
+    <title>管理設定</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+    <div th:replace="~{fragment :: header}"></div>
+
+    <main>
+        <div class="container samuraitravel-container py-5">
+            <h1 class="mb-4">管理設定</h1>
+
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+            <form th:action="@{/admin/settings}" th:object="${form}" method="post" novalidate>
+                <!-- 税率 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">税率(%)</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control"
+                               th:field="*{taxRatePercent}"
+                               step="0.01" min="0" max="100" required
+                               placeholder="10">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <div class="form-text">入力範囲：0～100</div>
+                    <div class="text-danger" th:if="${#fields.hasErrors('taxRatePercent')}"
+                         th:errors="*{taxRatePercent}">エラー</div>
+                </div>
+
+                <!-- 手数料 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">手数料(%)</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control"
+                               th:field="*{adminFeeRatePercent}"
+                               step="0.01" min="0" max="100" required
+                               placeholder="15">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <div class="form-text">入力範囲：0～100</div>
+                    <div class="text-danger" th:if="${#fields.hasErrors('adminFeeRatePercent')}"
+                         th:errors="*{adminFeeRatePercent}">エラー</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">保存</button>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>
+

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>利用規約</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container samuraitravel-container pt-4 pb-5">
+      <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+          <li class="breadcrumb-item active" aria-current="page">利用規約</li>
+        </ol>
+      </nav>
+
+      <h1 class="mb-3">利用規約</h1>
+      <p class="text-muted">最終更新日：<span th:text="${lastUpdated}">2025-10-23</span></p>
+      <hr>
+
+      <section class="mb-4">
+        <h2 class="h4">第1条（適用）</h2>
+        <p>本規約は、当運営者が提供するスタジオ時間貸し予約サービス「架空スタジオ予約サービス」（以下「本サービス」）の利用条件を定めるものです。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第2条（定義）</h2>
+        <ul>
+          <li>「ユーザー」…本サービスを利用するすべての者</li>
+          <li>「ホスト」…スタジオを登録・貸出するユーザー</li>
+          <li>「ゲスト」…スタジオを予約・利用するユーザー</li>
+        </ul>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第3条（登録）</h2>
+        <p>ユーザーは正確かつ最新の情報を提供するものとし、当運営者は不適当と判断した場合登録を拒否できます。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第4条（料金・支払）</h2>
+        <p>表示料金を所定の方法（例：クレジットカード）で支払うものとします。キャンセルはキャンセルポリシーに従います。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第5条（禁止事項）</h2>
+        <ul>
+          <li>法令・公序良俗に反する行為</li>
+          <li>無断転貸、設備の破損・汚損</li>
+          <li>システムへの不正アクセス 等</li>
+        </ul>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第6条（免責）</h2>
+        <p>当運営者はユーザー間のトラブル等について責任を負いません。不可抗力による停止等についても同様です。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第7条（知的財産）</h2>
+        <p>本サービスのコンテンツの権利は当運営者または正当な権利者に帰属します。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第8条（規約の変更）</h2>
+        <p>当運営者は必要に応じて本規約を変更し、本サイト上で告知します。</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4">第9条（準拠法・管轄）</h2>
+        <p>日本法に準拠し、当運営者所在地を管轄する地方裁判所を第一審の専属的合意管轄とします。</p>
+      </section>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

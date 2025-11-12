@@ -1,0 +1,198 @@
+<!-- src/main/resources/templates/host/closures/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>休館日設定</title>
+
+  <!-- FullCalendar（CDN） -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xxl-9 col-xl-10 col-lg-11">
+
+          <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+              <li class="breadcrumb-item"><a th:href="@{/host/rooms}">スタジオ一覧</a></li>
+              <li class="breadcrumb-item active" aria-current="page">休館日設定</li>
+            </ol>
+          </nav>
+
+          <h1 class="mb-3" th:text="|『${room.name}』の休館日設定|">休館日設定</h1>
+
+          <div th:if="${param.success}" class="alert alert-success">更新が完了しました。</div>
+          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+          <!-- カレンダー -->
+          <div id="calendar" class="mb-4"></div>
+
+          <!-- 休館日追加フォーム（日時入力対応） -->
+          <div class="card">
+            <div class="card-body">
+              <h2 class="h5 mb-3">休館日を追加</h2>
+
+<form th:action="@{/host/rooms/{roomId}/closures(roomId=${room.id})}"
+      method="post" th:object="${closureForm}" id="closureForm">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">開始日時</label>
+      <input type="datetime-local" class="form-control" th:field="*{startAt}" required step="900">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">終了日時</label>
+      <input type="datetime-local" class="form-control" th:field="*{endAt}" required step="900">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">理由（任意）</label>
+      <input type="text" class="form-control" th:field="*{reason}" maxlength="255" placeholder="メンテナンスなど">
+    </div>
+  </div>
+  <div class="mt-3 d-flex gap-2">
+    <button type="submit" class="btn samuraitravel-btn text-white shadow-sm">追加</button>
+    <!-- 終日トグル（任意） -->
+    <div class="form-check align-self-center">
+      <input class="form-check-input" type="checkbox" id="allDayToggle">
+      <label class="form-check-label" for="allDayToggle">終日設定</label>
+    </div>
+  </div>
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</form>
+            </div>
+          </div>
+
+          <!-- 既存リスト（削除ボタン付） -->
+          <div class="card mt-4">
+            <div class="card-body">
+              <h2 class="h5 mb-3">登録済みの休館</h2>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead><tr><th>期間</th><th>理由</th><th></th></tr></thead>
+                  <tbody>
+                  <tr th:each="c : ${closures}">
+                    <td>
+                      <span th:text="${#temporals.format(c.startAt, 'yyyy-MM-dd HH:mm')}"></span>
+                      〜
+                      <span th:text="${#temporals.format(c.endAt, 'yyyy-MM-dd HH:mm')}"></span>
+                      <!-- 終日判定（開始00:00 かつ 終了00:00 の場合に表示） -->
+                      <span class="text-muted"
+                            th:if="${#temporals.format(c.startAt,'HH:mm')=='00:00' and #temporals.format(c.endAt,'HH:mm')=='00:00'}">
+                        （終日）
+                      </span>
+                    </td>
+                    <td th:text="${c.reason}">休館</td>
+                    <td>
+                      <form th:action="@{/host/rooms/{rid}/closures/{cid}/delete(rid=${room.id},cid=${c.id})}"
+                            method="post" onsubmit="return confirm('削除しますか？');">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button class="btn btn-sm samuraitravel-btn-danger text-white">削除</button>
+                      </form>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(closures)}">
+                    <td colspan="3" class="text-muted">登録はまだありません。</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+
+<script th:inline="javascript">
+  // ==== CSRF（JS用） ====
+  const CSRF_PARAM = /*[[${_csrf.parameterName}]]*/ '_csrf';
+  const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
+
+  // ==== ユーティリティ：ローカル時刻で input[value] を作る ====
+  function toLocalDatetimeValue(d) {
+    const pad = n => String(n).padStart(2,'0');
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
+         + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    const roomId = /*[[${room.id}]]*/ 0;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'ja',
+      height: 'auto',
+      displayEventTime: true, // ← 時刻も表示
+      eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+      events: `/host/rooms/${roomId}/closures/events`,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay' // 週/日ビューも
+      },
+      eventClick: function(info) {
+        const cid = info.event.id;
+        if (confirm('この休館を削除しますか？')) {
+          // 動的フォーム + CSRF
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/host/rooms/${roomId}/closures/${cid}/delete`;
+
+          const csrf = document.createElement('input');
+          csrf.type = 'hidden';
+          csrf.name = CSRF_PARAM;
+          csrf.value = CSRF_TOKEN;
+          form.appendChild(csrf);
+
+          document.body.appendChild(form);
+          form.submit();
+        }
+      }
+    });
+
+    calendar.render();
+
+    // == 終日トグル：開始00:00、終了は翌日00:00（ローカル時刻でセット） ==
+    const allDay = document.getElementById('allDayToggle');
+    allDay?.addEventListener('change', function() {
+      const s = document.querySelector('[name="startAt"]');
+      const e = document.querySelector('[name="endAt"]');
+      if (!s.value) return;
+      const sd = new Date(s.value);  // datetime-local はローカルとして解釈される
+      if (this.checked) {
+        sd.setHours(0,0,0,0);
+        const ed = new Date(sd.getTime());
+        ed.setDate(ed.getDate() + 1);
+        s.value = toLocalDatetimeValue(sd);
+        e.value = toLocalDatetimeValue(ed);
+      }
+    });
+
+    // == 送信前バリデーション（開始 <= 終了） ==
+    document.getElementById('closureForm').addEventListener('submit', function(ev) {
+      const s = this.querySelector('[name="startAt"]').value;
+      const e = this.querySelector('[name="endAt"]').value;
+      if (s && e && new Date(s) > new Date(e)) {
+        ev.preventDefault();
+        alert('終了日時は開始日時以降を指定してください。');
+      }
+    });
+  });
+</script>
+</body>
+</html>
+

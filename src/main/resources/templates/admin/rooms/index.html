@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <head>
+       <div th:replace="~{fragment :: meta}"></div>
+
+       <div th:replace="~{fragment :: styles}"></div>
+
+       <title>スタジオ一覧</title>
+   </head>
+   <body>
+       <div class="samuraitravel-wrapper">
+           <div th:replace="~{fragment :: header}"></div>
+
+           <main>
+               <div class="container pt-4 pb-5 samuraitravel-container">
+                   <div class="row justify-content-center">
+                       <div class="col-xxl-9 col-xl-10 col-lg-11">
+
+                           <h1 class="mb-4 text-center">スタジオ一覧</h1>
+
+                            <div class="d-flex justify-content-between align-items-end flex-wrap">
+                                <form method="get" th:action="@{/admin/rooms}" class="mb-3">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="スタジオ名">
+                                        <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button>
+                                    </div>
+                                </form> 
+                               <a th:href="@{/admin/rooms/register}" class="btn text-white shadow-sm mb-3 samuraitravel-btn">登録</a>
+                           </div>
+                           
+                            <div th:if="${successMessage}" class="alert alert-info">
+                                <span th:text="${successMessage}"></span>
+                            </div>    
+                           
+                            <div th:if="${errorMessage}" class="alert alert-danger">
+                                <span th:text="${errorMessage}"></span>
+                            </div>
+
+                           <table class="table">
+                               <thead>
+                                   <tr>
+                                       <th scope="col">ID</th>
+                                       <th scope="col">スタジオ名</th>
+                                       <th scope="col">郵便番号</th>
+                                       <th scope="col">住所</th>
+                                       <th scope="col">スタジオ提供者名</th>
+                                       <th scope="col"></th>
+                                       <th scope="col"></th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   <tr th:each="room : ${roomPage}">
+                                       <td th:text="${room.id}"></td>
+                                       <td th:text="${room.name}"></td>
+                                       <td th:text="${room.postalCode}"></td>
+                                       <td th:text="${room.address}"></td>
+                                       <td th:text="${room.user != null ? room.user.name : ''}"></td>
+                                       <td><a th:href="@{/admin/rooms/__${room.id}__}">基本情報</a></td>
+                                       <td><a href="#" class="samuraitravel-link-danger" data-bs-toggle="modal" th:data-bs-target="${'#deleteRoomModal' + room.id}">削除</a></td>
+
+                                        <!-- 削除用モーダル -->
+                                        <div class="modal fade" th:id="${'deleteRoomModal' + room.id}" tabindex="-1" th:aria-labelledby="${'deleteRoomModalLabel' + room.id}">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" th:id="${'deleteRoomModalLabel' + room.id}" th:text="${room.name + 'を削除してもよろしいですか？'}"></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <form method="post"th:action="@{/admin/rooms/__${room.id}__/delete}">
+                                                            <button type="submit" class="btn samuraitravel-btn-danger text-white shadow-sm">削除</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>  
+                                   </tr>
+                               </tbody>
+                           </table>
+                            <!-- ページネーション -->
+                            <div th:if="${roomPage.getTotalPages() > 1}" class="d-flex justify-content-center">
+                                <nav aria-label="スタジオ一覧ページ">
+                                    <ul class="pagination">
+                                        <li class="page-item">
+                                            <span th:if="${roomPage.isFirst()}" class="page-link disabled">前</span>
+                                            <a th:unless="${roomPage.isFirst()}" th:href="@{/admin/rooms(page = ${roomPage.getNumber() - 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">前</a>
+                                        </li>
+                                        <li th:each="i : ${#numbers.sequence(0, roomPage.getTotalPages() - 1)}" class="page-item">
+                                            <span th:if="${i == roomPage.getNumber()}" class="page-link active samuraitravel-active" th:text="${i + 1}"></span>
+                                            <a th:unless="${i == roomPage.getNumber()}" th:href="@{/admin/rooms(page = ${i}, keyword = ${keyword})}" class="page-link samuraitravel-page-link" th:text="${i + 1}"></a>
+                                        </li>
+                                        <li class="page-item">
+                                            <span th:if="${roomPage.isLast()}" class="page-link disabled">次</span>
+                                            <a th:unless="${roomPage.isLast()}" th:href="@{/admin/rooms(page = ${roomPage.getNumber() + 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">次</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>  
+                       </div>
+                   </div>
+               </div>
+           </main>
+
+           <div th:replace="~{fragment :: footer}"></div>
+       </div>
+
+       <div th:replace="~{fragment :: scripts}"></div>
+   </body>
+</html>

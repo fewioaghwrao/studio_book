@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>レビューを書く</title>
+  <style>
+    /* シンプルな星評価（CSS） */
+    .star-rating {
+      direction: rtl; /* 右→左で並べて、先に高得点をクリックしやすく */
+      display: inline-flex;
+      gap: .25rem;
+      font-size: 1.6rem;
+    }
+    .star-rating input { display: none; }
+    .star-rating label {
+      cursor: pointer;
+      user-select: none;
+      filter: grayscale(1);
+      opacity: .6;
+      transition: transform .05s ease;
+    }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+      filter: none;
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xxl-8 col-xl-9 col-lg-10">
+
+          <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+              <li class="breadcrumb-item"><a th:href="@{/reservations}">予約一覧</a></li>
+              <li class="breadcrumb-item active" aria-current="page">レビューを書く</li>
+            </ol>
+          </nav>
+
+          <h1 class="mb-4 text-center">レビューを書く</h1>
+
+          <div class="card mb-4">
+            <div class="row g-0">
+              <div class="col-md-4">
+                <img th:if="${room.imageName}" th:src="@{/storage/__${room.imageName}__}" class="w-100" alt="スタジオ画像">
+                <img th:unless="${room.imageName}" th:src="@{/images/noImage.png}" class="w-100" alt="NO IMAGE">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title mb-1" th:text="${room.name}">スタジオ名</h5>
+                  <p class="text-muted mb-0" th:text="'住所：' + ${room.address}"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- レビュー投稿フォーム -->
+          <form th:action="@{/rooms/{roomId}/reviews(roomId=${room.id})}" method="post" th:object="${reviewForm}">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+            <!-- room_id と reservationId（任意：二重投稿防止に使う） -->
+            <input type="hidden" name="roomId" th:value="${room.id}">
+            <input type="hidden" name="reservationId" th:value="${reservationId}">
+            
+              <!-- ✅ エラーメッセージはココ（form内）に置く -->
+  <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger">
+    <ul class="mb-0">
+      <li th:each="e : ${#fields.errors('*')}" th:text="${e}"></li>
+    </ul>
+  </div>
+
+            <div class="mb-3">
+              <label class="form-label d-block">評価</label>
+
+              <!-- 星 5〜1（右→左）。アクセシビリティのため実体は radio -->
+              <div class="star-rating" aria-label="星で評価（1〜5）">
+                <input id="star5" type="radio" th:field="*{score}" value="5">
+                <label for="star5" title="5">★</label>
+
+                <input id="star4" type="radio" th:field="*{score}" value="4">
+                <label for="star4" title="4">★</label>
+
+                <input id="star3" type="radio" th:field="*{score}" value="3">
+                <label for="star3" title="3">★</label>
+
+                <input id="star2" type="radio" th:field="*{score}" value="2">
+                <label for="star2" title="2">★</label>
+
+                <input id="star1" type="radio" th:field="*{score}" value="1">
+                <label for="star1" title="1">★</label>
+              </div>
+
+              <!-- スコアのバリデーション用の目立つエラーメッセージ -->
+              <div class="form-text text-danger" th:errors="*{score}"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="content" class="form-label">コメント</label>
+              <textarea id="content" class="form-control" rows="6" placeholder="良かった点、気になった点など"
+                        th:field="*{content}" maxlength="1000" required></textarea>
+              <div class="form-text">
+                1000文字まで。公序良俗に反する表現はご遠慮ください。
+              </div>
+              <div class="form-text text-danger" th:errors="*{content}"></div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <a th:href="@{/reservations}" class="btn btn-outline-secondary">戻る</a>
+              <button type="submit" class="btn btn-primary">投稿する</button>
+            </div>
+            
+            <!-- ここから この部屋のレビュー一覧 -->
+<hr class="my-4">
+
+<h2 class="h5 mb-3">この部屋のレビュー</h2>
+
+<!-- 平均スコア表示（読み取り専用の星） -->
+<style>
+  .stars-readonly {
+    position: relative;
+    display: inline-block;
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  .stars-readonly .base { color: #ddd; }
+  .stars-readonly .fill {
+    position: absolute; left: 0; top: 0; white-space: nowrap; overflow: hidden;
+    color: #ffc107;
+  }
+</style>
+
+<div class="mb-2">
+  <span class="stars-readonly" aria-label="平均評価">
+    <span class="base">★★★★★</span>
+    <span class="fill" th:style="'width:' + (${avgScore} * 20) + '%;'">★★★★★</span>
+  </span>
+  <span class="ms-2">
+    <span th:text="${#numbers.formatDecimal(avgScore, 1, 1)}">0.0</span> / 5
+    （<span th:text="${reviewCount}">0</span> 件）
+  </span>
+</div>
+
+<!-- レビューリスト -->
+<div th:if="${reviewsPage.content.size() == 0}" class="text-muted">まだレビューはありません。</div>
+
+<div th:each="rv : ${reviewsPage.content}" class="card mb-3">
+  <div class="card-body">
+    <!-- 個別スコアの星 -->
+    <div class="mb-1">
+      <span class="stars-readonly" th:aria-label="${'スコア ' + rv.score}">
+        <span class="base">★★★★★</span>
+        <span class="fill" th:style="'width:' + (${rv.score} * 20) + '%;'">★★★★★</span>
+      </span>
+      <small class="text-muted ms-2"
+             th:text="${#temporals.format(rv.createdAt.toInstant().atZone(T(java.time.ZoneId).systemDefault()).toLocalDateTime(), 'yyyy/MM/dd HH:mm')}">
+        2025/01/01 12:00
+      </small>
+    </div>
+
+    <!-- コメント -->
+    <p class="mb-0" th:text="${rv.content}">コメント本文</p>
+
+    <!-- 投稿者（任意：名前がなければID表示） -->
+    <small class="text-muted d-block mt-1">
+      投稿者:
+      <span th:text="${rv.user != null && rv.user.name != null ? rv.user.name : 'ユーザーID ' + rv.user.id}">ユーザー</span>
+    </small>
+  </div>
+</div>
+
+<!-- ページネーション -->
+<div th:if="${reviewsPage.totalPages > 1}" class="d-flex justify-content-center">
+  <nav aria-label="レビュー一覧ページ">
+    <ul class="pagination">
+      <li class="page-item" th:classappend="${reviewsPage.first} ? 'disabled'">
+        <a class="page-link"
+           th:href="@{/rooms/{roomId}/reviews/new(roomId=${room.id}, page=${reviewsPage.number - 1}, reservationId=${reservationId})}">前</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(0, reviewsPage.totalPages - 1)}"
+          th:classappend="${i == reviewsPage.number} ? 'active'">
+        <a class="page-link"
+           th:text="${i + 1}"
+           th:href="@{/rooms/{roomId}/reviews/new(roomId=${room.id}, page=${i}, reservationId=${reservationId})}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${reviewsPage.last} ? 'disabled'">
+        <a class="page-link"
+           th:href="@{/rooms/{roomId}/reviews/new(roomId=${room.id}, page=${reviewsPage.number + 1}, reservationId=${reservationId})}">次</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+<!-- ここまで -->
+
+            
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

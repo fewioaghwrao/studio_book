@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>特定商取引法に基づく表記</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container samuraitravel-container pt-4 pb-5">
+      <nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+          <li class="breadcrumb-item active" aria-current="page">特定商取引法に基づく表記</li>
+        </ol>
+      </nav>
+
+      <h1 class="mb-3">特定商取引法に基づく表記</h1>
+      <p class="text-muted">最終更新日：<span th:text="${lastUpdated}">2025-10-23</span></p>
+      <hr>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <tbody>
+          <tr>
+            <th style="width:30%">販売事業者</th>
+            <td>N.O.</td>
+          </tr>
+          <tr>
+            <th>運営責任者</th>
+            <td>N.O.</td>
+          </tr>
+          <tr>
+            <th>所在地</th>
+            <td>東京都〇〇区〇〇1-2-3</td>
+          </tr>
+          <tr>
+            <th>連絡先</th>
+            <td>E-mail：<a href="mailto:info@example.com">info@example.com</a></td>
+          </tr>
+          <tr>
+            <th>販売価格</th>
+            <td>各スタジオ詳細ページに表示（時間単価/プランによる）</td>
+          </tr>
+          <tr>
+            <th>商品代金以外の必要料金</th>
+            <td>決済手数料（必要な場合）、通信料等</td>
+          </tr>
+          <tr>
+            <th>支払方法</th>
+            <td>クレジットカード決済（Stripe）ほか</td>
+          </tr>
+          <tr>
+            <th>支払時期</th>
+            <td>予約確定時に即時決済</td>
+          </tr>
+          <tr>
+            <th>役務の提供時期</th>
+            <td>予約日時に提供</td>
+          </tr>
+          <tr>
+            <th>キャンセル・変更</th>
+            <td>各スタジオのキャンセルポリシーに従います。返金の有無・条件はポリシーに記載。</td>
+          </tr>
+          <tr>
+            <th>返品・交換</th>
+            <td>役務の性質上、提供後の返品・交換はできません。</td>
+          </tr>
+          <tr>
+            <th>動作環境</th>
+            <td>最新の主要ブラウザ（Chrome/Edge/Safari/Firefox）</td>
+          </tr>
+          <tr>
+            <th>特記事項</th>
+            <td>未成年者の利用には保護者の同意が必要です。</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="small text-muted">※表記内容は架空のものです。</p>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

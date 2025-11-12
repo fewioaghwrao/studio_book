@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>売上明細</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main class="container samuraitravel-container pb-5">
+    <h1 class="my-4 text-center">売上明細</h1>
+
+    <!-- 予約ヘッダー -->
+    <table class="table mb-4">
+      <tr><th>スタジオ</th><td th:text="${reservation.roomName}"></td></tr>
+      <tr><th>予約者</th><td th:text="${reservation.guestName}"></td></tr>
+      <tr><th>期間</th>
+          <td th:text="${#temporals.format(reservation.startAt,'yyyy/MM/dd HH:mm')} + ' 〜 ' +
+                        ${#temporals.format(reservation.endAt,'yyyy/MM/dd HH:mm')}"></td></tr>
+      <tr><th>合計</th><td th:text="${#numbers.formatInteger(reservation.amount,1,'COMMA') + '円'}"></td></tr>
+<tr>
+  <th>状態</th>
+  <td th:switch="${reservation.status}">
+    <span th:case="'booked'">予約済み</span>
+    <span th:case="'paid'">利用済み</span>
+    <span th:case="'canceled'">キャンセル済み</span>
+    <span th:case="*">不明</span>
+  </td>
+</tr>
+    </table>
+
+    <!-- 明細 -->
+    <h4 class="mb-2">料金明細</h4>
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>種別</th>
+          <th>説明</th>
+          <th>適用期間</th>
+          <th>単価</th>
+          <th class="text-end">金額</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="i : ${items}">
+          <td th:text="${i.kind}"></td>
+          <td th:text="${i.description}"></td>
+          <td th:text="${#temporals.format(i.sliceStart,'yyyy/MM/dd H:mm')} + ' 〜 ' +
+                       ${#temporals.format(i.sliceEnd,'yyyy/MM/dd H:mm')}"></td>
+          <td th:text="${i.unitRatePerHour != null ? i.unitRatePerHour + '円/時' : '-'}"></td>
+          <td class="text-end" th:text="${#numbers.formatInteger(i.sliceAmount,1,'COMMA') + '円'}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(items)}">
+          <td colspan="5" class="text-center text-muted py-4">明細はありません。</td>
+        </tr>
+      </tbody>
+    </table>
+<a class="btn btn-outline-secondary"
+   th:href="@{/host/sales_details/{id}/items.csv(id=${reservation.reservationId})}">
+  明細CSV
+</a>
+<a class="btn btn-outline-danger"
+   th:href="@{/host/sales_details/{id}/invoice.pdf(id=${reservation.reservationId})}">
+  明細請求書PDF
+</a>
+    <a class="btn btn-secondary" th:href="@{/host/sales_details}">戻る</a>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

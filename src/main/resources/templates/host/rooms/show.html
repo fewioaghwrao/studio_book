@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
+    <div th:replace="~{fragment :: meta}"></div>
+    <div th:replace="~{fragment :: styles}"></div>
+    <title>スタジオ詳細</title>
+
+    <!-- ▼ FullCalendar（月表示だけ使う） -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+  </head>
+  <body>
+    <div class="samuraitravel-wrapper">
+      <div th:replace="~{fragment :: header}"></div>
+
+      <main>
+        <div class="container pt-4 pb-5 samuraitravel-container">
+          <div class="row justify-content-center">
+            <div class="col-xl-5 col-lg-6 col-md-8">
+              <nav class="mb-4" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                  <li class="breadcrumb-item"><a th:href="@{/host/rooms}">スタジオ一覧</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">スタジオ詳細</li>
+                </ol>
+              </nav>
+
+              <h1 class="mb-4 text-center" th:text="${room.name}"></h1>
+
+              <div class="mb-3">
+                <img th:if="${room.imageName}" th:src="@{/storage/__${room.imageName}__}" class="w-100" alt="スタジオ画像">
+                <img th:unless="${room.imageName}" th:src="@{/images/noImage.png}" class="w-100" alt="NO IMAGE">
+              </div>
+
+              <div class="container mb-4">
+                <div class="row pb-2 mb-2 border-bottom">
+                  <div class="col-4"><span class="fw-bold">ID</span></div>
+                  <div class="col"><span th:text="${room.id}"></span></div>
+                </div>
+
+                <div class="row pb-2 mb-2 border-bottom">
+                  <div class="col-4"><span class="fw-bold">スタジオ名</span></div>
+                  <div class="col"><span th:text="${room.name}"></span></div>
+                </div>
+
+                <div class="row pb-2 mb-2 border-bottom">
+                  <div class="col-4"><span class="fw-bold">説明</span></div>
+                  <div class="col"><span class="samuraitravel-pre-wrap" th:text="${room.description}"></span></div>
+                </div>
+<!-- ▼ 営業時間 表（room_businesshours） -->
+<div class="row pb-2 mb-2 border-bottom" th:with="wd=${ {'月','火','水','木','金','土','日'} }">
+  <div class="col-4"><span class="fw-bold">営業時間</span></div>
+  <div class="col">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+			        <!-- 先頭は見出し用の空白セル -->
+      <th style="width:5rem;"></th>
+            <!-- 見出しは 7 列（曜日） -->
+            <th class="text-center"
+                th:each="h : ${businessHours}"
+                th:text="${h.dayIndex != null && h.dayIndex >= 1 && h.dayIndex <= 7 ? wd[h.dayIndex - 1] : ''}">
+            </th>
+          </tr>
+        </thead>
+<tbody>
+<!-- 開始時刻の 1 行 -->
+<tr>
+	      <td class="fw-bold text-center">開始</td>
+  <td class="text-center"
+      th:each="h : ${businessHours}"
+      th:text="${#bools.isTrue(h.holiday) ? '休' : (h.startTime != null ? #temporals.format(h.startTime,'HH:mm') : '-')}">
+    --:--
+  </td>
+</tr>
+
+<!-- 終了時刻の 1 行 -->
+<tr>
+      <td class="fw-bold text-center">終了</td>
+  <td class="text-center"
+      th:each="h : ${businessHours}"
+      th:text="${#bools.isTrue(h.holiday) ? '休' : (h.endTime != null ? #temporals.format(h.endTime,'HH:mm') : '-')}">
+    --:--
+  </td>
+</tr>
+
+</tbody>
+      </table>
+    </div>
+    <div th:if="${#lists.isEmpty(businessHours)}" class="text-muted">（営業時間の設定がありません）</div>
+  </div>
+</div>
+<!-- ▲ 営業時間 表 -->
+
+                <div class="row pb-2 mb-2 border-bottom">
+                  <div class="col-4"><span class="fw-bold">基本料金</span></div>
+                  <div class="col"><span th:text="${#numbers.formatInteger(room.price, 1, 'COMMA') + '円'}"></span></div>
+                </div>
+
+<!-- ▼ 料金ルール（一覧表示：同じ列に収める） -->
+<div th:replace="~{fragment/room-pricing :: pricing(
+    ${flatFeeRules},
+    ${multiplierRules}
+)}"></div>
+<!-- ▲ 料金ルール -->
+
+
+
+
+                <div class="row pb-2 mb-2 border-bottom">
+                  <div class="col-4"><span class="fw-bold">最大定員</span></div>
+                  <div class="col"><span th:text="${room.capacity + '人'}"></span></div>
+                </div>
+
+                <div class="row pb-2 mb-2 border-bottom">
+                  <div class="col-4"><span class="fw-bold">郵便番号</span></div>
+                  <div class="col"><span th:text="${room.postalCode}"></span></div>
+                </div>
+
+                <div class="row pb-2 mb-2 border-bottom">
+                  <div class="col-4"><span class="fw-bold">住所</span></div>
+                  <div class="col"><span th:text="${room.address}"></span></div>
+                </div>
+              </div>
+
+              <!-- ▼ 休館日時カレンダー（月表示のみ） -->
+              <div class="card">
+                <div class="card-body">
+                  <h2 class="h5 mb-3">休館カレンダー</h2>
+                  <div id="closureCalendar"></div>
+                </div>
+              </div>
+              <!-- ▲ カレンダーここまで -->
+
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div th:replace="~{fragment :: footer}"></div>
+    </div>
+
+    <div th:replace="~{fragment :: scripts}"></div>
+
+    <script th:inline="javascript">
+      document.addEventListener('DOMContentLoaded', function () {
+        const roomId = /*[[${room.id}]]*/ 0;
+        const el = document.getElementById('closureCalendar');
+
+        const calendar = new FullCalendar.Calendar(el, {
+          initialView: 'dayGridMonth',   // 月表示のみ
+          locale: 'ja',
+          height: 'auto',
+          displayEventTime: true,        // 休館が時間帯指定の場合は時刻も出す
+          eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''                    // 他ビューは非表示
+          },
+          events: `/host/rooms/${roomId}/closures/events`, // 休館イベントのJSON
+          // 読み取り専用（クリックしても何もしない）
+          eventClick: function () { /* no-op */ }
+        });
+
+        calendar.render();
+      });
+    </script>
+  </body>
+</html>

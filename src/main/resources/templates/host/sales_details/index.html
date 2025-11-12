@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>売上明細一覧（ホスト）</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container samuraitravel-container pb-5">
+      <div class="row justify-content-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-11">
+
+          <h1 class="my-4 text-center">売上明細一覧（ホスト）</h1>
+
+          <!-- ▼ フィルタフォーム -->
+          <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/host/sales_details}">
+            <div class="col-sm-5">
+              <label class="form-label">スタジオ</label>
+              <select class="form-select" name="roomId">
+                <option th:value="${null}" th:selected="${selectedRoomId == null}">全体</option>
+                <option th:each="opt : ${roomOptions}"
+                        th:value="${opt.id}"
+                        th:text="${opt.name}"
+                        th:selected="${selectedRoomId != null and selectedRoomId == opt.id}">
+                </option>
+              </select>
+            </div>
+
+            <div class="col-sm-3">
+              <div class="form-check mt-4 pt-2">
+                <input class="form-check-input" type="checkbox" id="onlyItems"
+                       name="onlyWithItems" th:checked="${onlyWithItems}">
+                <label class="form-check-label" for="onlyItems">明細がある予約のみ</label>
+              </div>
+            </div>
+
+            <div class="col-sm-2">
+              <button type="submit" class="btn btn-primary w-100">選択適用</button>
+            </div>
+                        <div class="col-sm-2">
+            <a class="btn btn-primary w-100"
+   th:href="@{/host/sales_details.csv(roomId=${selectedRoomId}, onlyWithItems=${onlyWithItems})}">
+  CSVダウンロード
+</a>
+   </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+              <tr>
+                <th>スタジオ</th>
+                <th>予約者</th>
+                <th>開始</th>
+                <th>終了</th>
+                <th>料金</th>
+                <th>操作</th> <!-- ★ 追加 -->
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="r : ${rows}">
+                <td th:text="${r.roomName}"></td>
+                <td th:text="${r.guestName}"></td>
+                <td th:text="${#temporals.format(r.startAt, 'yyyy年M月d日 H:mm')}"></td>
+                <td th:text="${#temporals.format(r.endAt,   'yyyy年M月d日 H:mm')}"></td>
+                <td th:text="${#numbers.formatInteger(r.amount, 1, 'COMMA') + '円'}"></td>
+                  <td class="text-end">
+    <a class="btn btn-sm btn-outline-primary"
+       th:href="@{/host/sales_details/{id}(id=${r.reservationId})}">
+      明細
+    </a>
+  </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(rows)}">
+                <td colspan="5" class="text-center text-muted py-4">該当する予約はありません。</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ▼ ページネーション（5件ごと） -->
+          <nav th:if="${page != null and page.totalPages > 1}" aria-label="pagination" class="mt-3">
+            <ul class="pagination justify-content-center">
+              <!-- Prev -->
+              <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/host/sales_details(
+                      page=${page.number - 1},
+                      roomId=${selectedRoomId},
+                      onlyWithItems=${onlyWithItems}
+                   )}">前へ</a>
+              </li>
+
+              <!-- Page numbers -->
+              <li class="page-item"
+                  th:each="p : ${#numbers.sequence(0, page.totalPages - 1)}"
+                  th:classappend="${p == page.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${p + 1}"
+                   th:href="@{/host/sales_details(
+                      page=${p},
+                      roomId=${selectedRoomId},
+                      onlyWithItems=${onlyWithItems}
+                   )}"></a>
+              </li>
+
+              <!-- Next -->
+              <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/host/sales_details(
+                      page=${page.number + 1},
+                      roomId=${selectedRoomId},
+                      onlyWithItems=${onlyWithItems}
+                   )}">次へ</a>
+              </li>
+            </ul>
+          </nav>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

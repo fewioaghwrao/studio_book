@@ -1,0 +1,235 @@
+<!-- src/main/resources/templates/host/rooms/business-hours/edit.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>営業時間設定</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xxl-9 col-xl-10 col-lg-11">
+
+          <nav class="my-3" style="--bs-breadcrumb-divider: '>'; " aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+              <li class="breadcrumb-item"><a th:href="@{/host/rooms}">スタジオ一覧</a></li>
+              <li class="breadcrumb-item active">営業時間設定</li>
+            </ol>
+          </nav>
+
+          <h1 class="mb-4 text-center"
+              th:text="|${room.name} の営業時間設定|">営業時間設定</h1>
+
+          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+          <form method="post" th:action="@{|/host/rooms/${form.roomId}/business-hours|}" th:object="${form}">
+            <input type="hidden" th:field="*{roomId}"/>
+            <!-- CSRFが必要ならfragment側で自動、無ければ以下を有効化
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            -->
+
+            <!-- 00:00〜23:45 を 15分刻みで 96 件 -->
+            <th:block th:with="quarterIdxs=${#numbers.sequence(0,95)}">
+
+              <table class="table align-middle">
+                <thead>
+                  <tr>
+                    <th style="width:120px;">曜日</th>
+                    <th style="width:200px;">開始</th>
+                    <th style="width:200px;">終了</th>
+                    <th style="width:140px;">休み</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row, iStat : *{rows}">
+                  <td>
+                    <span th:text="${weekdayLabels[row.dayIndex]} + '曜'"></span>
+                    <input type="hidden"
+                           th:name="|rows[${iStat.index}].dayIndex|"
+                           th:value="${row.dayIndex}" />
+                  </td>
+
+                  <!-- 開始時刻 select -->
+                  <td>
+                    <select class="form-select"
+        th:classappend="${#fields.hasErrors('rows[' + iStat.index + '].startTime')} ? ' is-invalid' : ''"
+                            th:name="|rows[${iStat.index}].startTime|"
+                            th:id="|rows${iStat.index}startTime|"
+                            th:disabled="${row.holiday}">
+                      <option value="" th:text="'-- 選択 --'"></option>
+                      <option th:each="i : ${quarterIdxs}"
+                              th:value="${#temporals.format(T(java.time.LocalTime).MIDNIGHT.plusMinutes(i*15),'HH:mm')}"
+                              th:text="${#temporals.format(T(java.time.LocalTime).MIDNIGHT.plusMinutes(i*15),'HH:mm')}"
+                              th:selected="${row.startTime != null and
+                                  #temporals.format(row.startTime,'HH:mm') ==
+                                  #temporals.format(T(java.time.LocalTime).MIDNIGHT.plusMinutes(i*15),'HH:mm')}">
+                      </option>
+                    </select>
+                    <!-- サーバー検証エラー -->
+<div class="invalid-feedback"
+     th:if="${#fields.hasErrors('rows[' + iStat.index + '].startTime')}"
+     th:errors="*{rows[__${iStat.index}__].startTime}">開始エラー</div>
+                    <!-- クライアント検証エラー -->
+                    <div class="invalid-feedback client" style="display:none;"></div>
+                  </td>
+
+                  <!-- 終了時刻 select -->
+                  <td>
+                    <select class="form-select"
+                            th:classappend="${#fields.hasErrors('rows[' + iStat.index + '].endTime')} ? ' is-invalid' : ''"
+                            th:name="|rows[${iStat.index}].endTime|"
+                            th:id="|rows${iStat.index}endTime|"
+                            th:disabled="${row.holiday}">
+                      <option value="" th:text="'-- 選択 --'"></option>
+                      <option th:each="i : ${quarterIdxs}"
+                              th:value="${#temporals.format(T(java.time.LocalTime).MIDNIGHT.plusMinutes(i*15),'HH:mm')}"
+                              th:text="${#temporals.format(T(java.time.LocalTime).MIDNIGHT.plusMinutes(i*15),'HH:mm')}"
+                              th:selected="${row.endTime != null and
+                                  #temporals.format(row.endTime,'HH:mm') ==
+                                  #temporals.format(T(java.time.LocalTime).MIDNIGHT.plusMinutes(i*15),'HH:mm')}">
+                      </option>
+                    </select>
+                    <!-- サーバー検証エラー -->
+<div class="invalid-feedback"
+     th:if="${#fields.hasErrors('rows[' + iStat.index + '].endTime')}"
+     th:errors="*{rows[__${iStat.index}__].endTime}">終了エラー</div>
+                    <!-- クライアント検証エラー -->
+                    <div class="invalid-feedback client" style="display:none;"></div>
+                  </td>
+
+                  <!-- 休み -->
+                  <td>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input"
+                             type="checkbox"
+                             th:name="|rows[${iStat.index}].holiday|"
+                             th:id="|rows${iStat.index}holiday|"
+                             th:checked="${row.holiday}"
+                             onchange="toggleRow(this); validateRow(this.closest('tr')); validateAll();">
+                      <label class="form-check-label" th:for="|rows${iStat.index}holiday|">休み</label>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+
+            </th:block>
+
+            <div class="d-flex gap-2">
+              <button id="bh-submit" type="submit" class="btn btn-primary">保存する</button>
+              <a th:href="@{/host/rooms}" class="btn btn-outline-secondary">戻る</a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+
+<script th:inline="javascript">
+/* 休み ON/OFF で同じ行の select を disable/clear */
+function toggleRow(checkbox){
+  const tr = checkbox.closest('tr');
+  const selects = tr.querySelectorAll('select');
+  if (checkbox.checked){
+    selects.forEach(s => { s.value = ''; s.disabled = true; clearClientError(s); });
+  } else {
+    selects.forEach(s => { s.disabled = false; });
+  }
+}
+
+/* === ここから任意：クライアント即時検証（UX向上）=== */
+function parseHm(v){
+  if(!v) return null;
+  const m = v.match(/^(\d{2}):(\d{2})$/);
+  if(!m) return null;
+  return parseInt(m[1],10)*60 + parseInt(m[2],10);
+}
+
+function setClientError(el, msg){
+  if (!el) return;
+  el.classList.add('is-invalid');
+  let fb = el.parentElement.querySelector('.invalid-feedback.client');
+  if (fb){
+    fb.textContent = msg || '入力を確認してください。';
+    fb.style.display = '';
+  }
+}
+
+function clearClientError(el){
+  if (!el) return;
+  el.classList.remove('is-invalid');
+  let fb = el.parentElement.querySelector('.invalid-feedback.client');
+  if (fb){ fb.style.display = 'none'; }
+}
+
+function validateRow(tr){
+  const startSel = tr.querySelector('select[id$="startTime"]');
+  const endSel   = tr.querySelector('select[id$="endTime"]');
+  const holiday  = tr.querySelector('input[type="checkbox"][id$="holiday"]');
+
+  // 一旦クリア
+  clearClientError(startSel);
+  clearClientError(endSel);
+
+  if (holiday && holiday.checked) {
+    return true;
+  }
+
+  const sv = startSel?.value || "";
+  const ev = endSel?.value || "";
+  let ok = true;
+
+  if (!sv) { setClientError(startSel, "開始時刻を選択してください。"); ok = false; }
+  if (!ev) { setClientError(endSel, "終了時刻を選択してください。"); ok = false; }
+  if (!ok) return false;
+
+  const sm = parseHm(sv);
+  const em = parseHm(ev);
+  if (sm == null || em == null) return false;
+
+  if (em <= sm){
+    setClientError(endSel, "終了は開始より後の時刻を指定してください。");
+    return false;
+  }
+  return true;
+}
+
+function validateAll(){
+  const rows = document.querySelectorAll('tbody tr');
+  let allOK = true;
+  rows.forEach(tr => { if(!validateRow(tr)) allOK = false; });
+  const btn = document.getElementById('bh-submit');
+  if (btn) btn.toggleAttribute('disabled', !allOK);
+  return allOK;
+}
+
+document.addEventListener('change', (e) => {
+  const tr = e.target.closest('tr');
+  if (tr) {
+    validateRow(tr);
+    validateAll();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 初期ロード時
+  validateAll();
+});
+/* === ここまで任意 === */
+</script>
+</body>
+</html>
+
+

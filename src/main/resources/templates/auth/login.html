@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>ログイン</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xl-3 col-lg-4 col-md-5 col-sm-7">
+          <h1 class="mb-4 text-center">ログイン</h1>
+
+          <div th:if="${param.error}" class="alert alert-danger">
+            メールアドレスまたはパスワードが正しくありません。
+          </div>
+          <div th:if="${param.reset}" class="alert alert-success">
+            パスワードを更新しました。新しいパスワードでログインしてください。
+          </div>
+          <div th:if="${resetSuccess}" class="alert alert-success">
+            パスワードを更新しました。新しいパスワードでログインしてください。
+          </div>
+
+          <form th:action="@{/perform_login}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+<input type="email" class="form-control mb-3" name="username" placeholder="メールアドレス" autocomplete="email" autofocus>
+<div class="mb-3">
+  <label for="password" class="form-label">パスワード</label>
+  <div class="input-group">
+    <input type="password"
+           class="form-control"
+           id="password"
+           name="password"
+           placeholder="パスワード"
+           autocomplete="current-password">
+    <button type="button"
+            class="btn btn-outline-secondary"
+            id="togglePassword"
+            aria-label="パスワードの表示/非表示を切り替え"
+            aria-pressed="false">
+      <span class="label-show">表示</span>
+      <span class="label-hide d-none">非表示</span>
+    </button>
+  </div>
+</div>
+
+            <div class="text-end mb-3">
+              <a th:href="@{/password/forgot}">パスワードを忘れてしまったら？</a>
+            </div>
+
+            <button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">ログイン</button>
+          </form>
+
+          <div class="text-center mt-3">
+            <a class="nav-link" th:href="@{/signup}">会員登録</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+<div th:replace="~{fragment :: scripts}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const pw = document.getElementById('password');
+    const btn = document.getElementById('togglePassword');
+    if (!pw || !btn) return;
+
+    function setShown(show) {
+      pw.type = show ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(show));
+      btn.querySelector('.label-show').classList.toggle('d-none', show);
+      btn.querySelector('.label-hide').classList.toggle('d-none', !show);
+    }
+
+    // クリックでトグル
+    btn.addEventListener('click', function (e) {
+      e.preventDefault(); // 送信防止
+      setShown(pw.type === 'password');
+    });
+  });
+</script>
+</body>
+</html>

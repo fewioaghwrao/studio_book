@@ -1,0 +1,163 @@
+<!-- src/main/resources/templates/host/stats/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>統計一覧（ホスト）</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xxl-9 col-xl-10 col-lg-11">
+          <h1 class="mb-4 text-center">売上一覧（直近3か月）</h1>
+
+          <!-- 対象選択 -->
+          <div class="d-flex gap-2 mb-3 align-items-end">
+            <div>
+              <label class="form-label">対象スタジオ</label>
+              <select id="roomSelect" class="form-select">
+                <option value="0">全体（すべてのスタジオ）</option>
+                <option th:each="r: ${rooms}" th:value="${r.id}" th:text="${r.name}"></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <canvas id="statsChart" height="120"></canvas>
+            </div>
+          </div>
+
+         <!-- ▼ 直近3か月の稼働率 -->
+          <div class="row g-3 mt-3" id="utilSection">
+            <h1 class="mb-3 text-center">稼働率（直近3か月）</h1>
+            <div id="utilList" class="row g-3"></div>
+          </div>
+     
+          <div class="row g-3 mt-3" id="reviewSummary">
+			            <h1 class="mb-4 text-center">レビュー</h1>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title mb-2">平均レビュー（公開・非公開すべて）</h6>
+        <div class="d-flex align-items-end gap-2">
+          <div class="display-6 mb-0"><span id="avgAny">—</span></div>
+          <div class="text-muted">/ 5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title mb-2">平均レビュー（公開のみ）</h6>
+        <div class="d-flex align-items-end gap-2">
+          <div class="display-6 mb-0"><span id="avgPublic">—</span></div>
+          <div class="text-muted">/ 5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+          </div>
+       </div>
+    </div>
+
+</div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+(async function() {
+  const ctx = document.getElementById('statsChart').getContext('2d');
+
+  async function fetchData(roomId) {
+    const url = new URL(location.origin + '/host/stats/api');
+    if (roomId && Number(roomId) !== 0) url.searchParams.set('roomId', roomId);
+    const res = await fetch(url, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error('Failed to load stats');
+    return await res.json(); // { labels, booked, paid, reviewAvgAny, reviewAvgPublic }
+  }
+
+  function yen(x) {
+    return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(x);
+  }
+  function fmtAvg(x) {
+    if (x === null || x === undefined) return '—';
+    return (Math.round(x * 10) / 10).toFixed(1); // 小数1桁
+  }
+  function setAverages(data) {
+    document.getElementById('avgAny').textContent    = fmtAvg(data.reviewAvgAny);
+    document.getElementById('avgPublic').textContent = fmtAvg(data.reviewAvgPublic);
+  }
+  function renderUtilization(data) {
+    const labels = data.labels; // ["2025-08","2025-09","2025-10"] など
+    const rates  = data.utilizationPercents || []; // [ 67.3, 52.1, 81.0 ] など
+    const wrap   = document.getElementById('utilList');
+    if (!wrap) return;
+
+    wrap.innerHTML = labels.map((label, i) => {
+      const v = (rates[i] ?? null);
+      const text = v == null ? '—' : `${(Math.round(v * 10) / 10).toFixed(1)}%`;
+      return `
+        <div class="col-md-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted small mb-1">${label}</div>
+              <div class="display-6">${text}</div>
+              <div class="text-muted">（営業時間ベース）</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  let chart;
+  async function render(roomId) {
+    const data = await fetchData(roomId);
+    setAverages(data); // ▼ 追加
+    renderUtilization(data); // ★ 追加
+
+    const config = {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: '見込み売上', type: 'bar',  data: data.booked, borderWidth: 1 },
+          { label: '確定売上',   type: 'line', data: data.paid,   tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: (val) => yen(val) } }
+        },
+        plugins: {
+          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${yen(ctx.parsed.y)}` } },
+          legend: { position: 'top' }
+        }
+      }
+    };
+
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, config);
+  }
+
+  await render(0);
+  document.getElementById('roomSelect').addEventListener('change', (e) => render(e.target.value));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>レビュー管理（ホスト）</title>
+
+  <style>
+.stars-readonly{
+  --rate:0; --pct:calc(var(--rate)/5*100%);
+  display:inline-block;
+  font-size:1.1rem;
+  font-weight:900;
+  background:linear-gradient(90deg,#ffc107 var(--pct),#ccc var(--pct));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-shadow:0 0 2px #ffc10755;
+}
+  </style>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container pt-4 pb-5 samuraitravel-container">
+      <div class="row justify-content-center">
+        <div class="col-xxl-9 col-xl-10 col-lg-11">
+
+          <h1 class="mb-4 text-center">レビュー管理</h1>
+
+          <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+          <!-- （任意）簡易フィルタを置きたい場合はここにフォームを追加 -->
+          <!-- （追加）簡易フィルタ -->
+<form method="get" class="row g-2 align-items-end mb-3">
+  <!-- スタジオ選択 -->
+  <div class="col-sm-5 col-md-4">
+    <label class="form-label mb-1">スタジオ</label>
+    <select class="form-select" name="roomId">
+      <option th:value="${null}" th:selected="${roomId == null}">（すべて）</option>
+      <option th:each="rm : ${rooms}"
+              th:value="${rm.id}"
+              th:text="${rm.name}"
+              th:selected="${roomId != null and rm.id == roomId}">
+      </option>
+    </select>
+  </div>
+
+  <!-- 星数（完全一致） -->
+  <div class="col-sm-3 col-md-2">
+    <label class="form-label mb-1">評価</label>
+    <select class="form-select" name="stars">
+      <option th:value="${null}" th:selected="${stars == null}">（すべて）</option>
+      <option th:each="s : ${#numbers.sequence(1,5)}"
+              th:value="${s}"
+              th:text="${s + ' ★'}"
+              th:selected="${stars != null and s == stars}">
+      </option>
+    </select>
+  </div>
+
+  <!-- 非公開のみ -->
+  <div class="col-sm-4 col-md-3">
+    <div class="form-check mt-4">
+      <input class="form-check-input" type="checkbox" id="onlyHidden"
+             name="onlyHidden" value="true"
+             th:checked="${onlyHidden == true}">
+      <label class="form-check-label" for="onlyHidden">非公開のみ</label>
+    </div>
+  </div>
+
+  <!-- 検索ボタン -->
+  <div class="col-sm-12 col-md-3">
+    <button class="btn btn-outline-primary w-100">絞り込む</button>
+  </div>
+</form>
+
+
+          <table class="table align-middle">
+            <thead>
+            <tr>
+              <th scope="col" style="width:110px;">日付</th>
+              <th scope="col">スタジオ名</th>
+              <th scope="col">ユーザー</th>
+              <th scope="col" style="width:140px;">評価</th>
+              <th scope="col">本文</th>
+              <th scope="col" style="width:110px;">公開状態</th>
+              <th scope="col" style="width:280px;">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="rv : ${page}">
+              <!-- 日付（createdAt は Timestamp） -->
+              <td class="text-muted small" th:text="${#dates.format(rv.createdAt,'yyyy/MM/dd')}">2025/10/28</td>
+
+              <!-- スタジオ名 -->
+              <td>
+                <a th:text="${rv.room.name}">スタジオ名</a>
+              </td>
+
+              <!-- レビュー投稿者 -->
+              <td th:text="${rv.user != null ? rv.user.name : '（不明）'}">山田太郎</td>
+
+              <!-- 評価 -->
+              <td>
+                <span class="stars-readonly me-2" th:style="'--rate:' + ${rv.score}">★★★★★</span>
+                <span class="text-muted small" th:text="${#numbers.formatDecimal(rv.score,1,1)} + '/5.0'">4.0/5.0</span>
+              </td>
+
+              <!-- 本文 -->
+              <td class="review-content" th:text="${rv.content}"></td>
+
+              <!-- 公開状態 -->
+              <td>
+<!-- 公開状態 -->
+<div class="mb-2">
+  <span class="badge"
+        th:classappend="${rv.publicVisible == true} ? ' bg-success' : ' bg-secondary'"
+        th:text="${rv.publicVisible == true} ? '公開' : '非公開'"></span>
+
+  <!-- 理由の表示条件：公開でない かつ 理由がnull/空白でない -->
+  <span class="text-muted small ms-2"
+        th:if="${rv.publicVisible != true and !#strings.isEmpty(#strings.trim(rv.hiddenReason))}"
+        th:text="'理由: ' + ${rv.hiddenReason}"></span>
+</div>
+              </td>
+
+              <!-- 操作（返信保存＋公開切替） -->
+              <td>
+                <!-- 返信 -->
+                <form th:action="@{|/host/reviews/${rv.id}/reply|}" method="post" class="mb-2">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                  <textarea class="form-control mb-1 w-16rem" name="hostReply" rows="2"
+                            placeholder="ホストからの返信（公開）"
+                            th:text="${rv.hostReply}"></textarea>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-primary btn-sm">返信を保存</button>
+                    <span class="text-muted small ms-2" th:if="${rv.hostReplyAt}"
+                          th:text="'更新: ' + ${#temporals.format(rv.hostReplyAt,'yyyy/MM/dd HH:mm')}"></span>
+                  </div>
+                </form>
+
+                <!-- 公開切替 -->
+                <form th:action="@{|/host/reviews/${rv.id}/visibility|}" method="post" class="d-flex gap-2">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                  <!-- 送るのは「次の状態」 -->
+                  <input type="hidden" name="isPublic" th:value="${!rv.publicVisible}"/>
+                  <input type="text" class="form-control form-control-sm"
+                         name="reason" placeholder="非公開理由（任意）"
+                         th:if="${rv.publicVisible == true}">
+                  <button class="btn btn-outline-secondary btn-sm"
+                          th:text="${rv.publicVisible} ? '非公開にする' : '公開に戻す'"></button>
+                </form>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+          <!-- ページネーション（5件/ページ、フィルタを引き継ぐ） -->
+          <div th:if="${page.totalPages > 1}" class="d-flex justify-content-center">
+            <nav aria-label="レビュー管理ページ">
+              <ul class="pagination">
+                <li class="page-item">
+                  <span th:if="${page.first}" class="page-link disabled">前</span>
+                  <a th:unless="${page.first}"
+                     th:href="@{|/host/reviews?page=${page.number-1}
+                                  ${roomId!=null ? '&roomId=' + roomId : ''}
+                                  ${stars!=null ? '&stars=' + stars : ''}
+                                  ${onlyHidden!=null ? '&onlyHidden=' + onlyHidden : ''}|}"
+                     class="page-link samuraitravel-page-link">前</a>
+                </li>
+
+                <li th:each="i : ${#numbers.sequence(0, page.totalPages-1)}" class="page-item">
+                  <span th:if="${i==page.number}" class="page-link active samuraitravel-active" th:text="${i+1}"></span>
+                  <a th:unless="${i==page.number}"
+                     th:href="@{|/host/reviews?page=${i}
+                                  ${roomId!=null ? '&roomId=' + roomId : ''}
+                                  ${stars!=null ? '&stars=' + stars : ''}
+                                  ${onlyHidden!=null ? '&onlyHidden=' + onlyHidden : ''}|}"
+                     class="page-link samuraitravel-page-link" th:text="${i+1}"></a>
+                </li>
+
+                <li class="page-item">
+                  <span th:if="${page.last}" class="page-link disabled">次</span>
+                  <a th:unless="${page.last}"
+                     th:href="@{|/host/reviews?page=${page.number+1}
+                                  ${roomId!=null ? '&roomId=' + roomId : ''}
+                                  ${stars!=null ? '&stars=' + stars : ''}
+                                  ${onlyHidden!=null ? '&onlyHidden=' + onlyHidden : ''}|}"
+                     class="page-link samuraitravel-page-link">次</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>
+

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>ログ一覧</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+
+  <main>
+    <div class="container samuraitravel-container pb-5">
+      <div class="row justify-content-center">
+        <div class="col-xxl-10 col-xl-10 col-lg-11">
+
+          <h1 class="my-4 text-center">ログ一覧</h1>
+
+<form method="get" th:action="@{/admin/logs}" class="row g-2 mb-3">
+  <div class="col-md-4">
+    <input type="text" name="q" class="form-control" placeholder="キーワード (action/entity/note)"
+           th:value="${q}">
+  </div>
+  <div class="col-md-2">
+    <input type="number"  min="1" name="actorId" class="form-control" placeholder="会員ID"
+           th:value="${actorId}">
+  </div>
+  <div class="col-md-2">
+    <input type="number"  min="1" name="entityId" class="form-control" placeholder="対象ID"
+           th:value="${entityId}">
+  </div>
+  <div class="col-md-2">
+    <input type="text" name="action" class="form-control" placeholder="アクション"
+           th:value="${action}">
+  </div>
+  <div class="col-md-2">
+    <input type="text" name="entity" class="form-control" placeholder="対象"
+           th:value="${entity}">
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <input type="date" name="from" class="form-control" th:value="${from}">
+  </div>
+  <div class="col-sm-6 col-md-3">
+    <input type="date" name="to" class="form-control" th:value="${to}">
+  </div>
+
+  <div class="col-md-3 d-grid">
+    <button type="submit" class="btn btn-primary">検索</button>
+  </div>
+  <div class="col-md-3 d-grid">
+    <a class="btn btn-outline-secondary" th:href="@{/admin/logs}">条件クリア</a>
+  </div>
+</form>
+          <!-- メッセージ等あればここに -->
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+              <tr>
+                <th class="text-nowrap">ID</th>
+                <th class="text-nowrap">記録時刻</th>
+                <th class="text-nowrap">会員ID</th>
+                <th class="text-nowrap">アクション</th>
+                <th class="text-nowrap">対象</th>
+                <th class="text-nowrap">対象ID</th>
+                <th>メモ</th>
+              </tr>
+              </thead>
+<tbody>
+<tr th:if="${#lists.isEmpty(logs?.content)}">
+  <td colspan="7" class="text-center text-muted">ログはありません。</td>
+</tr>
+<tr th:each="log : ${logs.content}">
+  <td th:text="${log.id}">1</td>
+  <td th:text="${#temporals.format(log.ts, 'yyyy-MM-dd HH:mm')}">2025-01-01 10:00</td>
+  <td th:text="${log.actorId}">123</td>
+  <td th:text="${log.action}">UPDATE</td>
+  <td th:text="${log.entity}">Reservation</td>
+  <td th:text="${log.entityId}">456</td>
+  <td><div class="text-break" th:text="${log.note}">備考テキスト</div></td>
+</tr>
+</tbody>
+            </table>
+          </div>
+
+          <!-- ▼ ページネーション -->
+<!-- ▼ ページネーション：検索条件をURLに引き継ぐ -->
+<nav th:if="${logs.totalPages > 1}" aria-label="ページナビゲーション">
+  <ul class="pagination justify-content-center">
+    <li class="page-item" th:classappend="${logs.first} ? 'disabled'">
+      <a class="page-link"
+         th:href="@{/admin/logs(page=0, q=${q}, actorId=${actorId}, action=${action}, entity=${entity}, entityId=${entityId}, from=${from}, to=${to})}"
+         aria-label="First">
+        <span aria-hidden="true">&laquo;&laquo;</span>
+      </a>
+    </li>
+    <li class="page-item" th:classappend="${logs.first} ? 'disabled'">
+      <a class="page-link"
+         th:href="@{/admin/logs(page=${logs.number - 1}, q=${q}, actorId=${actorId}, action=${action}, entity=${entity}, entityId=${entityId}, from=${from}, to=${to})}"
+         aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+
+    <li class="page-item"
+        th:each="p : ${#numbers.sequence(T(java.lang.Math).max(0, logs.number-2),
+                                          T(java.lang.Math).min(logs.totalPages-1, logs.number+2))}"
+        th:classappend="${p == logs.number} ? 'active'">
+      <a class="page-link"
+         th:href="@{/admin/logs(page=${p}, q=${q}, actorId=${actorId}, action=${action}, entity=${entity}, entityId=${entityId}, from=${from}, to=${to})}"
+         th:text="${p + 1}">1</a>
+    </li>
+
+    <li class="page-item" th:classappend="${logs.last} ? 'disabled'">
+      <a class="page-link"
+         th:href="@{/admin/logs(page=${logs.number + 1}, q=${q}, actorId=${actorId}, action=${action}, entity=${entity}, entityId=${entityId}, from=${from}, to=${to})}"
+         aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+    <li class="page-item" th:classappend="${logs.last} ? 'disabled'">
+      <a class="page-link"
+         th:href="@{/admin/logs(page=${logs.totalPages - 1}, q=${q}, actorId=${actorId}, action=${action}, entity=${entity}, entityId=${entityId}, from=${from}, to=${to})}"
+         aria-label="Last">
+        <span aria-hidden="true">&raquo;&raquo;</span>
+      </a>
+    </li>
+  </ul>
+
+  <p class="text-center text-muted small mt-2"
+     th:text="'全 ' + ${logs.totalElements} + ' 件 / ' + (${logs.number}+1) + ' / ' + ${logs.totalPages} + ' ページ'">
+    全 0 件 / 0 / 0 ページ
+  </p>
+</nav>
+
+          <!-- ▲ ページネーション -->
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>

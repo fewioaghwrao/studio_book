@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <head>
+       <div th:replace="~{fragment :: meta}"></div>
+
+       <div th:replace="~{fragment :: styles}"></div>
+       <!-- fragment :: styles に追記 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- もし日本語化したい場合（任意） -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+
+
+       <title>スタジオ詳細</title>
+   </head>
+   <body>
+       <div class="samuraitravel-wrapper">
+           <div th:replace="~{fragment :: header}"></div>
+
+           <main>
+               <div class="container pt-4 pb-5 samuraitravel-container">
+                   <div class="row justify-content-center">
+                       <div class="col-xxl-9 col-xl-10 col-lg-11">
+                           <nav class="mb-4" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                               <ol class="breadcrumb mb-0">
+                                   <li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+                                   <li class="breadcrumb-item"><a th:href="@{/rooms}">スタジオ一覧</a></li>
+                                   <li class="breadcrumb-item active" aria-current="page">スタジオ詳細</li>
+                               </ol>
+                           </nav>
+
+                           <h1 class="mb-4 text-center" th:text="${room.name}"></h1>
+
+                           <div class="mb-4">
+                               <img th:if="${room.imageName}" th:src="@{/storage/__${room.imageName}__}" class="w-100" alt="スタジオ画像">
+                               <img th:unless="${room.imageName}" th:src="@{/images/noImage.png}" class="w-100" alt="NO IMAGE">
+                           </div>
+
+                           <div class="container">
+                               <div class="row">
+                                   <div class="col-lg-8 container mb-4">
+                                       <div class="row pb-2 mb-2 border-bottom">
+                                           <div class="col-4">
+                                               <span class="fw-bold">スタジオ名</span>
+                                           </div>
+
+                                           <div class="col">
+                                               <span th:text="${room.name}"></span>
+                                           </div>
+                                       </div>
+
+                                       <div class="row pb-2 mb-2 border-bottom">
+                                           <div class="col-4">
+                                               <span class="fw-bold">説明</span>
+                                           </div>
+
+                                           <div class="col">
+                                               <span class="samuraitravel-pre-wrap" th:text="${room.description}"></span>
+                                           </div>
+                                       </div>
+<!-- ▼ 営業時間 表（room_businesshours） -->
+<div class="row pb-2 mb-2 border-bottom" th:with="wd=${ {'月','火','水','木','金','土','日'} }">
+  <div class="col-4"><span class="fw-bold">営業時間</span></div>
+  <div class="col">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+			        <!-- 先頭は見出し用の空白セル -->
+      <th style="width:5rem;"></th>
+            <!-- 見出しは 7 列（曜日） -->
+            <th class="text-center"
+                th:each="h : ${businessHours}"
+                th:text="${h.dayIndex != null && h.dayIndex >= 1 && h.dayIndex <= 7 ? wd[h.dayIndex - 1] : ''}">
+            </th>
+          </tr>
+        </thead>
+<tbody>
+<!-- 開始時刻の 1 行 -->
+<tr>
+	      <td class="fw-bold text-center">開始</td>
+  <td class="text-center"
+      th:each="h : ${businessHours}"
+      th:text="${#bools.isTrue(h.holiday) ? '休' : (h.startTime != null ? #temporals.format(h.startTime,'HH:mm') : '-')}">
+    --:--
+  </td>
+</tr>
+
+<!-- 終了時刻の 1 行 -->
+<tr>
+      <td class="fw-bold text-center">終了</td>
+  <td class="text-center"
+      th:each="h : ${businessHours}"
+      th:text="${#bools.isTrue(h.holiday) ? '休' : (h.endTime != null ? #temporals.format(h.endTime,'HH:mm') : '-')}">
+    --:--
+  </td>
+</tr>
+
+</tbody>
+      </table>
+    </div>
+    <div th:if="${#lists.isEmpty(businessHours)}" class="text-muted">（営業時間の設定がありません）</div>
+  </div>
+</div>
+<!-- ▲ 営業時間 表 -->
+                                       <div class="row pb-2 mb-2 border-bottom">
+                                           <div class="col-4">
+                                               <span class="fw-bold">基本料金</span>
+                                           </div>
+
+                                           <div class="col">
+                                               <span th:text="${#numbers.formatInteger(room.price, 1, 'COMMA') + '円'}"></span>
+                                           </div>
+                                       </div>
+
+<!-- ▼ 料金ルール（一覧表示：同じ列に収める） -->
+<div th:replace="~{fragment/room-pricing :: pricing(${flatFeeRules}, ${multiplierRules})}"></div>
+<!-- ▲ 料金ルール -->
+
+                                      <div class="row pb-2 mb-2 border-bottom">
+                                           <div class="col-4">
+                                               <span class="fw-bold">定員</span>
+                                           </div>
+
+                                           <div class="col">
+                                               <span th:text="${room.capacity + '人'}"></span>
+                                           </div>
+                                       </div>
+
+                                       <div class="row pb-2 mb-2 border-bottom">
+                                           <div class="col-4">
+                                               <span class="fw-bold">郵便番号</span>
+                                           </div>
+
+                                           <div class="col">
+                                               <span th:text="${room.postalCode}"></span>
+                                           </div>
+                                       </div>
+
+                                       <div class="row pb-2 mb-2 border-bottom">
+                                           <div class="col-4">
+                                               <span class="fw-bold">住所</span>
+                                           </div>
+
+                                           <div class="col">
+                                               <span th:text="${room.address}"></span>
+                                           </div>
+                                       </div>
+                               <div class="row pb-2 mb-2 border-bottom">
+                                   <div class="col-4">
+                                       <span class="fw-bold">スタジオ提供者</span>
+                                   </div>
+
+                                   <div class="col">
+                                       <span th:text="${room.user != null ? room.user.name : ''}"></span>
+                                   </div>
+                               </div>
+
+                                   </div>
+
+<!-- 未ログイン / ホスト / 管理者 は「ログインが必要です」を表示 -->
+<div sec:authorize="isAnonymous() or hasAnyAuthority('ROLE_HOST','ROLE_ADMIN')" class="col-lg-4 px-0 ps-lg-4 mb-4">
+  <div class="card">
+    <div class="card-body">
+      <p class="card-text">予約は一般会員のみ可能です。一般会員で<a th:href="@{/login}">ログイン</a>してください。</p>
+      <button type="button" class="btn text-white shadow-sm w-100 samuraitravel-btn" disabled>予約する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 一般ユーザー（ROLE_GENERAL）のみ 予約フォームを表示 -->
+<div sec:authorize="hasAuthority('ROLE_GENERAL')" class="col-lg-4 px-0 ps-lg-4 mb-4">
+  <div class="card">
+    <div class="card-body">
+		
+	  <div class="alert alert-info small">
+        <strong>ご注意</strong><br>
+        本スタジオは営業時間内のご利用のみ可能です。<br>
+        日をまたぐ連続利用をご希望の場合は、<br>
+        「1日ごと」に予約をお取りください。
+      </div>
+		
+      <form method="post"
+            th:action="@{/rooms/__${room.id}__/reservations/input}"
+            th:object="${reservationInputForm}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        
+        　<!-- ▼ グローバルエラー（ここを追加） -->
+        <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+          <ul class="mb-0">
+            <li th:each="e : ${#fields.globalErrors()}" th:text="${e}"></li>
+          </ul>
+        </div>
+        <!-- ▲ 追加ここまで -->
+
+        <!-- 開始日 -->
+        <div class="mb-3">
+          <label class="form-label">開始日</label>
+          <input type="text" class="form-control js-date" th:field="*{startDate}" placeholder="YYYY-MM-DD">
+          <div class="text-danger small" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></div>
+        </div>
+
+        <!-- 開始時刻 -->
+        <div class="mb-3">
+          <label class="form-label">開始時刻</label>
+          <input type="text" class="form-control js-time" th:field="*{startTime}" placeholder="HH:mm">
+          <div class="text-danger small" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
+        </div>
+
+        <!-- 終了日 -->
+        <div class="mb-3">
+          <label class="form-label">終了日</label>
+          <input type="text" class="form-control js-date" th:field="*{endDate}" placeholder="YYYY-MM-DD">
+          <div class="text-danger small" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></div>
+        </div>
+
+        <!-- 終了時刻 -->
+        <div class="mb-3">
+          <label class="form-label">終了時刻</label>
+          <input type="text" class="form-control js-time" th:field="*{endTime}" placeholder="HH:mm">
+          <div class="text-danger small" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></div>
+        </div>
+
+        <button type="submit" class="btn text-white shadow-sm w-100 samuraitravel-btn">
+          予約する（確認へ）
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+                               </div>
+                           </div>
+                       </div>
+                 
+                   <div>
+					   <h1>カレンダー</h1>
+					   <!-- ▼ ここを <h1>カレンダー</h1> の直後に -->
+<div id="availability-calendar" class="card mb-4">
+  <div class="card-body p-2">
+<div id="fc"
+     th:attr="data-events-url=@{/rooms/{id}/calendar/events(id=${room.id})}"
+     style="min-height: 720px;"></div>
+    <div class="small text-muted mt-2">
+      <span class="me-3">
+        <span style="display:inline-block;width:12px;height:12px;background:#e6ffe6;border:1px solid #cde8cd;margin-right:6px;"></span>
+        営業時間（空き背景）
+      </span>
+      <span class="me-3">
+        <span style="display:inline-block;width:12px;height:12px;background:#e9ecef;border:1px solid #ced4da;margin-right:6px;"></span>
+        休業（クローズ）
+      </span>
+      <span>
+        <span style="display:inline-block;width:12px;height:12px;background:#ff6b6b;border:1px solid #dc5a5a;margin-right:6px;"></span>
+        予約済み
+      </span>
+    </div>
+  </div>
+</div>
+<!-- ▲ ここまで -->
+				   </div>
+
+               <hr class="my-4">
+
+<h2 class="h5 mb-3">この部屋のレビュー</h2>
+
+<!-- 平均スコアの星（読み取り専用） -->
+<style>
+  .stars-readonly {
+    position: relative;
+    display: inline-block;
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  .stars-readonly .base { color: #ddd; }
+  .stars-readonly .fill {
+    position: absolute; left: 0; top: 0;
+    white-space: nowrap; overflow: hidden;
+    color: #ffc107;
+  }
+</style>
+
+<div class="mb-2">
+  <span class="stars-readonly" aria-label="平均評価">
+    <span class="base">★★★★★</span>
+    <span class="fill" th:style="'width:' + (${avgScore} * 20) + '%;'">★★★★★</span>
+  </span>
+  <span class="ms-2">
+    <span th:text="${#numbers.formatDecimal(avgScore, 1, 1)}">0.0</span> / 5
+    （<span th:text="${reviewCount}">0</span> 件）
+  </span>
+</div>
+
+<!-- レビューが無い場合 -->
+<div th:if="${reviewsPage.content.size() == 0}" class="text-muted">まだレビューはありません。</div>
+
+<!-- 公開レビュー一覧（本文＋星を表示） -->
+<div th:each="rv : ${reviewsPage.content}" class="card mb-3">
+  <div class="card-body">
+    <!-- 星（公開分のみ） -->
+    <div class="mb-1">
+      <span class="stars-readonly" th:aria-label="${'スコア ' + rv.score}">
+        <span class="base">★★★★★</span>
+        <span class="fill" th:style="'width:' + (${rv.score} * 20) + '%;'">★★★★★</span>
+      </span>
+      <small class="text-muted ms-2"
+             th:text="${#temporals.format(rv.createdAt.toInstant().atZone(T(java.time.ZoneId).systemDefault()).toLocalDateTime(), 'yyyy/MM/dd HH:mm')}">
+        2025/01/01 12:00
+      </small>
+    </div>
+
+    <!-- コメント本文 -->
+    <p class="mb-0" th:text="${rv.content}">コメント本文</p>
+
+    <!-- 投稿者 -->
+    <small class="text-muted d-block mt-1">
+      投稿者:
+      <span th:text="${rv.user != null && rv.user.name != null ? rv.user.name : 'ユーザーID ' + rv.user.id}">
+        ユーザー
+      </span>
+    </small>
+
+    <!-- （任意）ホスト返信があるなら併記してもOK -->
+    <div class="mt-2" th:if="${rv.hostReply}">
+      <span class="badge bg-info text-dark me-1">スタジオ提供者</span>
+      <div class="samuraitravel-pre-wrap" th:text="${rv.hostReply}"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ホストからのお知らせ（非公開レビューの返信のみ表示） -->
+<div th:if="${hiddenWithReply != null and !hiddenWithReply.isEmpty()}">
+  <h3 class="h6 mt-4 mb-2">ホストからのお知らせ</h3>
+
+  <div th:each="rv : ${hiddenWithReply}" class="card mb-3 border-info">
+    <div class="card-body">
+      <div class="mb-2">
+        <span class="badge bg-secondary me-1">非公開レビュー</span>
+        <span class="badge bg-info text-dark">スタジオ提供者</span>
+      </div>
+
+      <!-- ★ 非公開なので “星” と “ユーザー本文” は出さない -->
+      <div class="samuraitravel-pre-wrap" th:text="${rv.hostReply}">返信本文</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ページネーション -->
+<div th:if="${reviewsPage.totalPages > 1}" class="d-flex justify-content-center">
+  <nav aria-label="レビュー一覧ページ">
+    <ul class="pagination">
+      <li class="page-item" th:classappend="${reviewsPage.first} ? 'disabled'">
+        <a class="page-link"
+           th:href="@{/rooms/{roomId}(roomId=${room.id}, page=${reviewsPage.number - 1})}">前</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(0, reviewsPage.totalPages - 1)}"
+          th:classappend="${i == reviewsPage.number} ? 'active'">
+        <a class="page-link"
+           th:text="${i + 1}"
+           th:href="@{/rooms/{roomId}(roomId=${room.id}, page=${i})}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${reviewsPage.last} ? 'disabled'">
+        <a class="page-link"
+           th:href="@{/rooms/{roomId}(roomId=${room.id}, page=${reviewsPage.number + 1})}">次</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+  </div>
+               </div>
+           </main>
+
+           <div th:replace="~{fragment :: footer}"></div>
+       </div>
+
+       <div th:replace="~{fragment :: scripts}"></div>
+       <!-- fragment :: scripts に追記（jQuery不要） -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 日付ピッカー
+    flatpickr(".js-date", {
+      dateFormat: "Y-m-d",
+      minDate: "today",
+      locale: "ja"
+    });
+
+    // 時刻ピッカー（24h, 30分刻み）
+    flatpickr(".js-time", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+      minuteIncrement: 30,
+      locale: "ja"
+    });
+  });
+</script>
+<!-- FullCalendar CDN（未導入なら追加） -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/ja.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 既存の flatpickr 初期化はこのまま
+
+    const el = document.getElementById('fc');
+    if (!el) return;
+    const eventsUrl = el.dataset.eventsUrl; // ← ここから取得
+
+const calendar = new FullCalendar.Calendar(el, {
+  locale: 'ja',
+  timeZone: 'local',
+  height: 'auto',
+  initialView: 'timeGridWeek',
+  nowIndicator: true,
+  slotMinTime: '00:00:00',
+  slotMaxTime: '24:00:00',
+  expandRows: true,
+   lazyFetching: false, 
+    
+   headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+   // right: 'dayGridMonth,timeGridWeek'
+   right: 'timeGridWeek'
+  },
+    datesSet: function() {
+    // 画面遷移（prev/next/today/ビュー切替）ごとに塗り直し
+    paintMonthCells(calendar);
+  },
+
+  loading: function(isLoading) {
+    // イベント取得が完了した時点で塗り直し
+    if (!isLoading) paintMonthCells(calendar);
+  },
+
+  // 受け取ったJSONをここで補正
+  eventDataTransform: function(e) {
+    const t = e.extendedProps && e.extendedProps.type;
+    // サーバ側が display:'background' を付け忘れてても背景にする
+    if (t === 'open' || t === 'closure') {
+      e.display = 'background';
+    }
+    return e;
+  },
+
+  // 種別に応じてクラス付与（背景/予約で色分け）
+  eventClassNames: function(arg) {
+    const t = arg.event.extendedProps?.type;
+    if (arg.event.display === 'background') {
+      if (t === 'open')    return ['bg-open'];
+      if (t === 'closure') return ['bg-closure'];
+    } else {
+      if (t === 'reservation') return ['evt-reservation'];
+    }
+    return [];
+  },
+
+  // 最後の手で色を直指定（CSS競合に強い）
+  eventDidMount: function(info) {
+    const t = info.event.extendedProps?.type;
+    if (info.event.display === 'background') {
+      info.el.style.opacity = '0.6';
+      if (t === 'open') {
+        info.el.style.backgroundColor = '#bff0bf';
+        info.el.style.borderColor     = '#cde8cd';
+      } else if (t === 'closure') {
+        info.el.style.backgroundColor = '#d9dde2';
+        info.el.style.borderColor     = '#ced4da';
+      }
+    } else if (t === 'reservation') {
+      info.el.style.backgroundColor = '#ff6b6b';
+      info.el.style.borderColor     = '#dc5a5a';
+      info.el.style.color           = '#fff';
+    }
+  },
+
+  // 取得元（data-* から）
+  events: {
+    url: eventsUrl,
+    method: 'GET',
+    failure: () => console.error('カレンダーイベントの取得に失敗しました')
+  },
+
+  // デバッグ：読み込み成功時に件数表示
+  eventSourceSuccess: function(content, xhr) {
+    console.log('[FC] events loaded:', Array.isArray(content) ? content.length : content);
+    return content;
+  },
+
+  eventOrder: 'display,start',
+  eventClick: function(info) {
+    if (info.event.extendedProps && info.event.extendedProps.type === 'reservation') {
+      // 予約クリック時の挙動（必要なら）
+    } else {
+      info.jsEvent.preventDefault();
+    }
+  }
+});
+
+// ▼ 月ビューの日セルを「営業 or 休業」で塗る
+function paintMonthCells(cal) {
+  const view = cal.view;
+  if (view.type !== 'dayGridMonth') return;
+
+  // すべてのイベント（この月の表示範囲に重なる分が入っているはず）
+  const events = cal.getEvents();
+  const openBg    = events.filter(e => e.extendedProps?.type === 'open');
+  const closureBg = events.filter(e => e.extendedProps?.type === 'closure');
+
+  // 月ビューの日セルを取得して1つずつ判定
+  document.querySelectorAll('.fc-daygrid-day').forEach(cell => {
+    cell.classList.remove('fc-day-open', 'fc-day-closure');
+
+    const dateStr = cell.getAttribute('data-date'); // 'YYYY-MM-DD'
+    if (!dateStr) return;
+
+    // その日の [00:00, 24:00) 区間
+    const dayStart = new Date(dateStr + 'T00:00:00');
+    const dayEnd   = new Date(dateStr + 'T23:59:59'); // ほぼ終日まで
+
+    const overlaps = (s, e, a, b) => (e > a) && (b > s); // 半開区間の重なり判定
+
+    const hasClosure = closureBg.some(ev => overlaps(ev.start, ev.end || ev.start, dayStart, dayEnd));
+    const hasOpen    = openBg.some(   ev => overlaps(ev.start, ev.end || ev.start, dayStart, dayEnd));
+
+    // 優先度：休業 > 営業
+    if (hasClosure) {
+      cell.classList.add('fc-day-closure');
+    } else if (hasOpen) {
+      cell.classList.add('fc-day-open');
+    }
+  });
+}
+
+    calendar.render();
+  });
+</script>
+<style>
+  /* 背景イベント（空き/クローズ） */
+  .fc .fc-bg-event.bg-open {
+    background-color: #bff0bf !important;
+    border-color:     #cde8cd !important;
+    opacity: .6 !important;
+  }
+  .fc .fc-bg-event.bg-closure {
+    background-color: #d9dde2 !important;
+    border-color:     #ced4da !important;
+    opacity: .6 !important;
+  }
+
+  /* 予約（前面） */
+  .fc .fc-event.evt-reservation {
+    background-color: #ff6b6b !important;
+    border-color:     #dc5a5a !important;
+    color: #fff !important;
+  }
+  /* 月ビュー用：日セルを直接塗る（closure を優先） */
+.fc .fc-daygrid-day.fc-day-closure {
+  background-color: #d9dde2 !important; /* 休業 */
+}
+.fc .fc-daygrid-day.fc-day-open {
+  background-color: #bff0bf !important; /* 営業（空き） */
+}
+</style>
+
+
+
+ </body>
+</html>

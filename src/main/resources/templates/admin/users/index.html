@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <head>
+       <div th:replace="~{fragment :: meta}"></div>
+
+       <div th:replace="~{fragment :: styles}"></div>
+
+       <title>会員一覧</title>
+   </head>
+   <body>
+       <div class="samuraitravel-wrapper">
+           <div th:replace="~{fragment :: header}"></div>
+
+           <main>
+               <div class="container pt-4 pb-5 samuraitravel-container">
+                   <div class="row justify-content-center">
+                       <div class="col-xxl-9 col-xl-10 col-lg-11">
+
+                           <h1 class="mb-4 text-center">会員一覧</h1>
+
+                           <div class="d-flex justify-content-between align-items-end">
+                               <form method="get" th:action="@{/admin/users}" class="mb-3">
+                                   <div class="input-group">
+                                       <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="氏名・フリガナ">
+                                       <button type="submit" class="btn text-white shadow-sm samuraitravel-btn">検索</button>
+                                   </div>
+                               </form>
+                           </div>
+                           <!-- 検索フォームの下あたりに成功メッセージ枠を追加 -->
+<div th:if="${successMessage}" class="alert alert-success">
+  <span th:text="${successMessage}"></span>
+</div>
+                           
+                            <div th:if="${errorMessage}" class="alert alert-danger">
+                                <span th:text="${errorMessage}"></span>
+                            </div> 
+
+                           <table class="table">
+                               <thead>
+                                   <tr>
+                                       <th scope="col">ID</th>
+                                       <th scope="col">氏名</th>
+                                       <th scope="col">フリガナ</th>
+                                       <th scope="col">メールアドレス</th>
+                                       <th scope="col">属性</th>
+                                       <th scope="col">状態</th> <!-- ★ 追加 -->
+                                       <th scope="col"></th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   <tr th:each="user : ${userPage}">
+                                       <td th:text="${user.id}"></td>
+                                       <td th:text="${user.name}"></td>
+                                       <td th:text="${user.furigana}"></td>
+                                       <td th:text="${user.email}"></td>
+                                       <!-- ★ roleIdに応じて属性を切り替え -->
+      <td>
+        <span th:switch="${user.role != null ? user.role.id : 0}">
+          <span th:case="1">会員</span>
+          <span th:case="2">スタジオ提供者</span>
+          <span th:case="3">管理者</span>
+          <span th:case="*">未設定</span>
+        </span>
+      </td>
+      
+            <!-- ★ 状態（有効/無効バッジ） -->
+      <td>
+        <span th:if="${user.enabled}" class="badge bg-success">有効</span>
+        <span th:unless="${user.enabled}" class="badge bg-secondary">無効</span>
+      </td>
+      <!-- 操作（詳細 + トグルボタン） -->
+      <td class="text-nowrap">
+        <a th:href="@{/admin/users/__${user.id}__}">詳細</a>
+
+        <!-- 管理者(role_id=3) 以外にのみトグルボタンを表示 -->
+        <form method="post"
+              th:if="${user.role == null || user.role.id != 3}"
+              th:action="@{/admin/users/__${user.id}__/enabled}"
+              class="d-inline"
+              onsubmit="return confirm(this.dataset.msg);"
+              th:attr="data-msg=${user.enabled} ? '無効にしますか？' : '有効にしますか？'">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <!-- サーバに送りたい目標状態（現在の反転） -->
+          <input type="hidden" name="enabled" th:value="${!user.enabled}" />
+          <button type="submit"
+                  class="btn btn-sm"
+                  th:classappend="${user.enabled} ? ' btn-outline-danger' : ' btn-outline-success'">
+            <span th:text="${user.enabled} ? '有効 → 無効' : '無効 → 有効'"></span>
+          </button>
+        </form>
+
+        <!-- 管理者は変更不可ボタン（押せない） -->
+        <button th:if="${user.role != null && user.role.id == 3}"
+                class="btn btn-sm btn-outline-secondary ms-2" disabled
+                title="管理者は変更できません">
+          変更不可
+        </button>
+      </td>
+                                   </tr>
+                               </tbody>
+                           </table>
+
+                           <!-- ページネーション -->
+                           <div th:if="${userPage.getTotalPages() > 1}" class="d-flex justify-content-center">
+                               <nav aria-label="会員一覧ページ">
+                                   <ul class="pagination">
+                                       <li class="page-item">
+                                           <span th:if="${userPage.isFirst()}" class="page-link disabled">前</span>
+                                           <a th:unless="${userPage.isFirst()}" th:href="@{/admin/users(page = ${userPage.getNumber() - 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">前</a>
+                                       </li>
+                                       <li th:each="i : ${#numbers.sequence(0, userPage.getTotalPages() - 1)}" class="page-item">
+                                           <span th:if="${i == userPage.getNumber()}" class="page-link active samuraitravel-active" th:text="${i + 1}"></span>
+                                           <a th:unless="${i == userPage.getNumber()}" th:href="@{/admin/users(page = ${i}, keyword = ${keyword})}" class="page-link samuraitravel-page-link" th:text="${i + 1}"></a>
+                                       </li>
+                                       <li class="page-item">
+                                           <span th:if="${userPage.isLast()}" class="page-link disabled">次</span>
+                                           <a th:unless="${userPage.isLast()}" th:href="@{/admin/users(page = ${userPage.getNumber() + 1}, keyword = ${keyword})}" class="page-link samuraitravel-page-link">次</a>
+                                       </li>
+                                   </ul>
+                               </nav>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </main>
+
+           <div th:replace="~{fragment :: footer}"></div>
+       </div>
+
+       <div th:replace="~{fragment :: scripts}"></div>
+ </body>
+</html>

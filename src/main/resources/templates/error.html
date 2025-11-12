@@ -1,0 +1,32 @@
+<!-- src/main/resources/templates/error.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <div th:replace="~{fragment :: meta}"></div>
+  <div th:replace="~{fragment :: styles}"></div>
+  <title>エラー</title>
+</head>
+<body>
+<div class="samuraitravel-wrapper">
+  <div th:replace="~{fragment :: header}"></div>
+  <main class="container pt-4 pb-5 samuraitravel-container">
+    <h1 class="mb-3">エラーが発生しました</h1>
+
+    <p class="text-muted mb-2">申し訳ありません。ページの表示中に問題が発生しました。</p>
+    <div class="card mb-3">
+      <div class="card-body">
+        <div>ステータス: <span th:text="${status}">-</span></div>
+        <div>エラー: <span th:text="${error}">-</span></div>
+        <div th:if="${message}">メッセージ: <span th:text="${message}"></span></div>
+        <div th:if="${path}">パス: <span th:text="${path}"></span></div>
+      </div>
+    </div>
+
+    <a th:href="@{/}" class="btn btn-primary">ホームに戻る</a>
+    <a href="javascript:history.back()" class="btn btn-outline-secondary ms-2">前のページへ戻る</a>
+  </main>
+  <div th:replace="~{fragment :: footer}"></div>
+</div>
+<div th:replace="~{fragment :: scripts}"></div>
+</body>
+</html>
