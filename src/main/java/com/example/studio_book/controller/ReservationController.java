@@ -168,6 +168,8 @@ this.reservationInputValidator = reservationInputValidator;
         }
         if (binding.hasErrors()) {
             // エラー時は rooms/show を再描画するため、画面に必要なモデルを詰め直す
+        	 System.out.println("[INPUT] binding errors:");
+        	    binding.getAllErrors().forEach(e -> System.out.println("  - " + e));
             populateRoomShowModel(roomId, model);
             return "rooms/show";
         }

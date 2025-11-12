@@ -6,7 +6,6 @@ import java.time.LocalTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -14,7 +13,7 @@ import lombok.Data;
 public class ReservationInputForm {
 
     @NotNull(message = "開始日を選択してください。")
-    @FutureOrPresent(message = "開始日は本日以降を選択してください。")
+//    @FutureOrPresent(message = "開始日は本日以降を選択してください。")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
@@ -23,7 +22,7 @@ public class ReservationInputForm {
     private LocalTime startTime;
 
     @NotNull(message = "終了日を選択してください。")
-    @FutureOrPresent(message = "終了日は本日以降を選択してください。")
+//    @FutureOrPresent(message = "終了日は本日以降を選択してください。")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
