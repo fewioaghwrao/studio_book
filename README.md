@@ -7,7 +7,6 @@
 > この README は ER 図および各ロール別状態遷移図（一般ユーザー／スタジオ提供者／管理者）を前提とした設計ドキュメントを兼ねています。
 
 ---
-
 ## 目次
 
 - [スタジオ時間貸し予約アプリ（Studio Book）](#スタジオ時間貸し予約アプリstudio-book)
@@ -134,17 +133,50 @@
 
 ## 画面イメージ
 
-※ 実際の README では `docs/screenshots` 配下に画像を配置し、以下のような形で貼り付けます。
+<div align="center">
 
-```md
-![トップページ](docs/screenshots/top.png)
-![スタジオ詳細](docs/screenshots/room_detail.png)
-![予約カレンダー](docs/screenshots/room_calendar.png)
-![ホストダッシュボード](docs/screenshots/host_dashboard.png)
-![管理者ダッシュボード](docs/screenshots/admin_dashboard.png)
-```
+<table>
+  <!-- 1行目 -->
+  <tr>
+    <td align="center" width="260" height="40"><strong>トップページ</strong></td>
+    <td align="center" width="260" height="40"><strong>スタジオ詳細</strong></td>
+    <td align="center" width="260" height="40"><strong>予約カレンダー</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/screenshots/top.png" width="240">
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/room_detail.png" width="240">
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/room_calendar.png" width="240">
+    </td>
+  </tr>
 
----
+  <!-- 2行目 -->
+  <tr>
+    <td align="center" width="260" height="40"><strong>ホストダッシュボード</strong></td>
+    <td align="center" width="260" height="40"><strong>管理者ダッシュボード</strong></td>
+    <td align="center" width="260" height="40"><strong>&nbsp;</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/screenshots/host_dashboard.png" width="240">
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/admin_dashboard.png" width="240">
+    </td>
+    <td align="center">
+      <!-- 空欄にしておきたい場合 -->
+      &nbsp;
+    </td>
+  </tr>
+</table>
+
+</div>
+
+
 
 ## アーキテクチャ・技術スタック
 
