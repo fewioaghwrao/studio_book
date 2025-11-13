@@ -314,7 +314,7 @@ spring.mail.password=password
 
 ### 6. ロール別ログインアカウント（例）テストアカウント
 
-【テストアカウント】
+【テストアカウント】:Webと共通です。
 
 - ● 管理者  
   - email: `admin1@example.com`  
