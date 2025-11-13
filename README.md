@@ -212,8 +212,8 @@
 ## ドメインモデルと状態遷移
 
 ### ER 図
-図としては以下のようになります。`/docs/ER図.drawio` を参照してください。
-![ER図](docs/diagrams/ER図.drawio.png)
+図としては以下のようになります。`/docs/ERD.drawio.png` を参照してください。
+![ER図](docs/diagrams/ERD.drawio.png)
   
 主なテーブル例（詳細は ER 図を参照）:
 - `users`（ユーザー / ロール情報）
@@ -229,20 +229,17 @@
 
 ### 状態遷移図
 
-各ロールごとに状態遷移図を用意しています。`/docs/state_diagrams` 配下に配置する想定です。
+各ロールごとに状態遷移図は以下のようになります。
 
-- `状態遷移図(一般ユーザー).drawio`
-  - 例: ゲスト → 会員登録 → ログイン → 予約中 → 決済完了 → 利用済み → レビュー投稿 … の遷移
-- `状態遷移図(スタジオ提供者).drawio`
-  - 例: スタジオ未登録 → 審査中 → 公開中 → 一時停止 → 削除 など
-  - 予約ステータス（未入金 / 入金済み / キャンセル / 返金済み 等）との関係
-- `状態遷移図(管理者).drawio`
-  - 例: スタジオ申請受付 → 審査 → 承認 / 却下
-  - ユーザー凍結 / 解凍
-  - システム設定の変更フロー など
+- 状態遷移図(一般ユーザー)`/docs/state_user.drawio.png`
+  ![状態遷移図(一般ユーザー)](docs/diagrams/state_user.drawio.png)
+  
+- 状態遷移図(スタジオ提供者)`/docs/state_host.drawio.png`
+  ![状態遷移図(スタジオ提供者)](docs/diagrams/state_host.drawio.png)
 
-README では詳細な図は割愛し、**設計資料として draw.io ファイルを参照できる**ことを明記することで、ポートフォリオとしての説得力を高めています。
-
+- 状態遷移図(管理者)`/docs/state_admin.drawio.png`
+  ![状態遷移図(管理者)](docs/diagrams/state_admin.drawio.png)
+  
 ---
 
 ## ローカル開発環境の構築手順
