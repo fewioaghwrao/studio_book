@@ -212,10 +212,10 @@
 ## ドメインモデルと状態遷移
 
 ### ER 図
-
-`/docs/ER図.drawio` を参照してください。  
+図としては以下のようになります。`/docs/ER図.drawio` を参照してください。
+![ER図](docs/diagrams/ER図.drawio.png)
+  
 主なテーブル例（詳細は ER 図を参照）:
-
 - `users`（ユーザー / ロール情報）
 - `rooms`（スタジオ情報）
 - `business_hours`（曜日別営業時間）
