@@ -10,6 +10,22 @@
 
 > この README は ER 図および各ロール別状態遷移図（一般ユーザー／スタジオ提供者／管理者）を前提とした設計ドキュメントを兼ねています。
 
+## 🔗 **デモサイト**  
+[https://studio-book-naoki2025-d9e2f98301ba.herokuapp.com/](https://studio-book-naoki2025-d9e2f98301ba.herokuapp.com/) 
+- ※ 初回アクセス時は起動に数十秒かかる場合があります
+
+## デモ用アカウント
+- 管理者  
+  - email: `admin1@example.com`  
+  - password: `Admin123!`
+
+- スタジオ提供者（ホスト）  
+  - email: `host1@example.com`  
+  - password: `Host123!`
+
+- 一般ユーザー  
+  - email: `user1@example.com`  
+  - password: `User123!`
 ## 🛠 技術スタック
 
 - **Backend:** Java 17, Spring Boot 3, Spring MVC, Spring Security
@@ -346,15 +362,15 @@ spring.mail.password=password
 
 【テストアカウント】:Webと共通です。
 
-- ● 管理者  
+- 管理者  
   - email: `admin1@example.com`  
   - password: `Admin123!`
 
-- ● スタジオ提供者（ホスト）  
+- スタジオ提供者（ホスト）  
   - email: `host1@example.com`  
   - password: `Host123!`
 
-- ● 一般ユーザー  
+- 一般ユーザー  
   - email: `user1@example.com`  
   - password: `User123!`
 
