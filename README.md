@@ -241,7 +241,7 @@
   - Chart.js（ホスト・管理者用統計グラフ）
 - **データベース**
   - MySQL / MariaDB
-  - Flyway or schema.sql / data.sql による初期データ投入
+  - schema.sql / data.sql による初期データ投入
 - **外部サービス**
   - Stripe（決済）
   - Mailgun（メール送信を想定）
@@ -250,7 +250,7 @@
   - Spring Test / MockMvc
   - Mockito
 - **その他**
-  - Maven or Gradle
+  - Maven
   - Heroku / Railway 等へのデプロイを想定
 
 ---
@@ -300,7 +300,7 @@
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/your-account/studio-book.git
+git clone https://github.com/fewioaghwrao/studio_book.git
 cd studio-book
 ```
 
