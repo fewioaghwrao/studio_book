@@ -26,6 +26,33 @@
 - 一般ユーザー  
   - email: `user1@example.com`  
   - password: `User123!`
+
+---
+
+## アーキテクチャ構成
+
+本システムは、**業務系Webアプリで一般的な構成**を想定し、  
+**Spring Boot（バックエンド）を中心に、Thymeleaf によるサーバーサイドレンダリング（SSR）**で実装しています。
+
+### 構成概要
+- **バックエンド（Spring Boot）**
+  - 認証・認可（Spring Security）
+  - 業務ロジック（予約・料金計算・決済・権限制御）
+  - DBアクセス（Spring Data JPA）
+- **フロント（Thymeleaf / Bootstrap）**
+  - 画面テンプレート生成（SSR）
+  - 入力・表示・画面遷移
+  - 一部動的UI（FullCalendar / Chart.js など）
+
+この構成により、
+- **画面〜業務ロジック〜DB**を一貫して管理でき、要件変更への追従がしやすい
+- ロール（一般ユーザー／ホスト／管理者）ごとの**権限と画面導線**を整理しやすい
+- 予約・決済など**業務ドメイン中心の設計**を明確にできる
+
+という点を重視しています。
+
+---
+
 ## 🛠 技術スタック
 
 - **Backend:** Java 17, Spring Boot 3, Spring MVC, Spring Security
