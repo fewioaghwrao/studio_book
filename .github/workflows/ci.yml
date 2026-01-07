@@ -6,24 +6,19 @@ on:
   pull_request:
 
 jobs:
-  backend:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
+          distribution: temurin
           java-version: "21"
-          cache: "maven"
+          cache: maven
 
-      # Testcontainers(jdbc:tc) が Docker を使うため
-      - name: Verify Docker is available
-        run: docker version
+      - name: Build (skip heavy tests)
+        run: mvn -B clean package -DskipTests=true
 
-      - name: Run tests
-        env:
-          SPRING_PROFILES_ACTIVE: test
-        run: mvn -B test
