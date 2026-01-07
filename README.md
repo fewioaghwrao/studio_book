@@ -130,17 +130,23 @@ Webhook では Stripe-Signature による署名検証を行い、正当なイベ
 ## CI / 品質管理（GitHub Actions）
 
 本リポジトリでは **GitHub Actions による CI（継続的インテグレーション）** を導入し、
-push / pull request 時にビルドとテストを自動実行します。
+push / pull request 時に **ビルドおよびテストを自動実行**しています。
 
 ### 実行内容
-- `mvn -B test`（ユニットテスト実行）
-- Java：21（Maven）
+- Maven ビルドおよびテスト実行  
+  - `mvn -B test`
+- Java 21 / Maven
 
-### ワークフロー
+### CI 設計方針
+本プロジェクトは既存コードベースに対して CI を後付けする想定のため、  
+**まずは「常にビルド可能な状態を保つこと」を最優先**としています。
+
+- 外部依存（DB / メール / 決済 API など）を伴わないテストを CI の対象とする
+- アプリ全体起動を伴うテスト（`@SpringBootTest`）は現時点では CI 対象外
+- 統合テスト・E2E テストは、環境分離や Testcontainers 整備後に段階的に追加予定
+
+### ワークフロー定義
 - `.github/workflows/ci.yml`
-
-※ CI 安定性を優先し、アプリ全体起動を伴うテスト（`@SpringBootTest`）は現時点では対象外としています。
-（外部依存・DB初期化を含む統合テストは、段階的に追加予定）
 
 ---
 ## 目次
