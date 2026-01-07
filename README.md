@@ -123,6 +123,22 @@ Webhook では Stripe-Signature による署名検証を行い、正当なイベ
 - **テスト:** JUnit5, Spring Test（MockMvc）, Mockito
 - **外部サービス:** Stripe(決済 + Webhook), Mail（本番想定）
 - **デプロイ:** Heroku(デモ)
+---
+
+## CI / 品質管理（GitHub Actions）
+
+本リポジトリでは **GitHub Actions による CI（継続的インテグレーション）** を導入し、
+push / pull request 時にビルドとテストを自動実行します。
+
+### 実行内容
+- `mvn -B test`（ユニットテスト実行）
+- Java：21（Maven）
+
+### ワークフロー
+- `.github/workflows/ci.yml`
+
+※ CI 安定性を優先し、アプリ全体起動を伴うテスト（`@SpringBootTest`）は現時点では対象外としています。
+（外部依存・DB初期化を含む統合テストは、段階的に追加予定）
 
 ---
 ## 目次
